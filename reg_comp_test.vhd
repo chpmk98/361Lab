@@ -37,7 +37,7 @@ architecture behavioral of reg_comp_test is
             assert busB = "10011001100110011001100110011001" report "read after write" severity error;
             wait for 5 ns;
             RegWr <= '0';
-            busW <= "01100110011001100110011001100110";
+            busW <= "11110110000001100110011001100110";
             wait for 5 ns;
             clk <= '1';
             wait for 5 ns;
@@ -45,15 +45,17 @@ architecture behavioral of reg_comp_test is
             wait for 5 ns;
             assert busB = "10011001100110011001100110011001" report "RegWr = 0" severity error;
             wait for 5 ns;
-            Ra <= "00011";
             Rw <= "00011";
+            Ra <= "00011";
             RegWr <= '1';
             wait for 5 ns;
             clk <= '1';
             wait for 5 ns;
             clk <= '0';
             wait for 5 ns;
-            assert busA = "01100110011001100110011001100110" report "read after write 2" severity error;
+            -- Ra <= "00011";
+            wait for 5 ns;
+            assert busA = "11110110000001100110011001100110" report "read after write 2" severity error;
             assert busB = "10011001100110011001100110011001" report "changed without write" severity error;
             wait for 5 ns;
             wait;

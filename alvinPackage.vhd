@@ -13,7 +13,6 @@ package alvinPackage is
             inWrite :  in std_logic_vector(31 downto 0);
             RegWr   :  in std_logic;
             Rst     :  in std_logic;
-            RegRead :  in std_logic;
             clk     :  in std_logic;
             Q       : out std_logic_vector(31 downto 0)
         );
@@ -60,4 +59,12 @@ package alvinPackage is
 	         busB    : out std_logic_vector(31 downto 0)
 	     );
 	 end component reg_comp;
+	 
+	 -- Sign-extends a 16-bit input to 32-bits
+	 component extender_signed is
+        port (
+           src    :  in std_logic_vector(15 downto 0);
+           rslt   : out std_logic_vector(31 downto 0)
+        );
+    end component extender_signed;
 end;

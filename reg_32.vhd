@@ -17,7 +17,6 @@ entity reg_32 is
         inWrite :  in std_logic_vector(31 downto 0);
         RegWr   :  in std_logic;
         Rst     :  in std_logic;
-        RegRead :  in std_logic;
         clk     :  in std_logic;
         Q       : out std_logic_vector(31 downto 0)
     );
@@ -28,7 +27,7 @@ architecture structural of reg_32 is
    begin
        dFFs   : for i in 0 to 31 generate
           dFF : dffr_a
-             port map (clk, Rst, RegRead, curQ(i), inWrite(i), RegWr, curQ(i));
+             port map (clk, Rst, '0', curQ(i), inWrite(i), RegWr, curQ(i)); --RegRead, curQ(i), inWrite(i), RegWr, curQ(i));
        end generate dFFs;
        
        Q <= curQ;

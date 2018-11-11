@@ -29,7 +29,6 @@ architecture structural of reg_comp is
     signal RegWrBinaryActual : std_logic_vector(31 downto 0);
     signal RegABinary : std_logic_vector(31 downto 0);
     signal RegBBinary : std_logic_vector(31 downto 0);
-    signal RegReadBinary : std_logic_vector(31 downto 0);
     signal RegOuts : std_logic_vector(1023 downto 0);
     signal MuxAOuts : std_logic_vector(1023 downto 0);
     signal MuxBOuts : std_logic_vector(1023 downto 0);
@@ -42,9 +41,6 @@ architecture structural of reg_comp is
             
         regBToBin : reg_addToBinary
         port map (Rb, RegBBinary);
-            
-        orMap : or_gate_32
-           port map (RegABinary, RegBBinary, RegReadBinary);
         
         andMaps : for i in 0 to 31 generate
            andMap : and_gate
@@ -58,14 +54,7 @@ architecture structural of reg_comp is
         RegOuts(31 downto 0) <= "00000000000000000000000000000000";
         regs : for i in 1 to 31 generate
            regMap : reg_32
-           port map (
-               inWrite => busW,
-               RegWr => RegWrBinaryActual(i),
-               Rst => '0',
-               RegRead => RegReadBinary(i),
-               clk => clk,
-               Q => RegOuts((32*i + 31) downto (32*i))
-           );
+           port map (busW, RegWrBinaryActual(i), '0', clk, RegOuts((32*i + 31) downto (32*i)));
         end generate regs;
         
         -- These are the MUXs to select the output for busA
