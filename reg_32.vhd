@@ -28,7 +28,7 @@ architecture structural of reg_32 is
    begin
        dFFs   : for i in 0 to 31 generate
           dFF : dffr_a
-             port map (clk, Rst, RegRead, inWrite(i), curQ(i), RegWr, curQ(i));
+             port map (clk, Rst, RegRead, curQ(i), inWrite(i), RegWr, curQ(i));
        end generate dFFs;
        
        Q <= curQ;
