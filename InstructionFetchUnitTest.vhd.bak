@@ -26,7 +26,7 @@ architecture behavioral of InstructionFetchUnitTest is
     end component InstructionFetchUnit;
     begin
     testcomp: InstructionFetchUnit
-    port map(clk,arst,Branch,Zero,Sign,Instruction,"bills_branch.dat");
+    port map(clk,arst,Branch,Zero,Sign,Instruction,"data/bills_branch.dat");
     testbench: process
     begin
        arst <= '1';

@@ -3,10 +3,12 @@ use ieee.std_logic_1164.all;
 use work.eecs361_gates.all;
 use work.eecs361.all;
 use work.alvinPackage.all;
+use work.InstructionFetchUnitPackage.all;
 
 entity InstructionFetchUnit is
     port(
         clk: in std_logic;
+        rst: in std_logic; -- resets the PC to 0x00400020
         Branch: in std_logic_vector(1 downto 0);
         Zero: in std_logic;
         Sign: in std_logic;
@@ -48,7 +50,7 @@ architecture structural of InstructionFetchUnit is
     end component add_32;
     
     begin
-        PC: reg_32 port map(Pcin,'1','0',clk,Pcout);
+        PC: reg_32_ar port map(Pcin,'1','0',rst,x"00400020",clk,Pcout);
         
         Add4toPC: add_32 port map(Pcout,"00000000000000000000000000000100",'0',PCplus4,open,open);
         
@@ -76,11 +78,11 @@ architecture structural of InstructionFetchUnit is
         MakeInstructionMemory: sram 
         generic map(mem_file => InFile)
         port map(
-        cs => clk,
+        cs => '1',
         oe =>'1',
         we => '0',
         addr => PCout,
-        din => '00000000000000000000000000000000',
+        din => "00000000000000000000000000000000",
         dout => InstrMemOut);
         
         Instruction <= InstrMemOut;     
