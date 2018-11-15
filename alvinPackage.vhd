@@ -67,4 +67,40 @@ package alvinPackage is
            rslt   : out std_logic_vector(31 downto 0)
         );
     end component extender_signed;
+    
+    -- 32-bit ALU
+    component final_alu_32_v2 is
+	    port(
+	    a	: in std_logic_vector(31 downto 0);
+	    b	: in std_logic_vector(31 downto 0);
+	    ctrl: in std_logic_vector(3 downto 0);
+	    s 	: out std_logic_vector(31 downto 0);
+	    z   : out std_logic;
+	    cout: out std_logic;
+	    ovflow: out std_logic
+	    );
+    end component final_alu_32_v2;
+    
+    -- This is the processor part with the registers, ALU,
+    --  and data memory. Doesn't include instruction memory
+    --  or calculation of flags or anything.
+    component fatBoi is
+        port (
+            clk         :  in std_logic;
+            ALUctr      :  in std_logic_vector(3 downto 0);
+            Rs          :  in std_logic_vector(4 downto 0);
+            Rt          :  in std_logic_vector(4 downto 0);
+            Rd          :  in std_logic_vector(4 downto 0);
+            Imm16       :  in std_logic_vector(15 downto 0);
+            RegDst      :  in std_logic;
+            RegWr       :  in std_logic;
+            ALUsrc      :  in std_logic;
+            MemWr       :  in std_logic;
+            MemtoReg    :  in std_logic;
+            Zero        : out std_logic;
+            Carry       : out std_logic;
+            Overflow    : out std_logic;
+            dMemFile    :     string
+        );
+    end component fatBoi;
 end;
