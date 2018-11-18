@@ -14,7 +14,8 @@ entity sc_proc is
         clk         :  in std_logic;
         instMemFile :  string;
         dataMemFile :  string;
-        pcReset     :  in std_logic
+        pcReset     :  in std_logic;
+        reg7to0     : out std_logic_vector(255 downto 0)
     );
 end sc_proc;
 
@@ -46,8 +47,8 @@ architecture structural of sc_proc is
                
         FB  : fatBoi
            port map ( clk, ACALUctr, Inst(25 downto 21), Inst(20 downto 16), Inst(15 downto 11), Inst(10 downto 6),
-                      Inst(15 downto 0), MCRegDst, MCRegWr, MCALUsrc, MCMemWr, MCMemtoReg, fbZero, fbCarry, fbOverflow,
-                      fbSign, dataMemFile);
+                      Inst(15 downto 0), MCRegDst, MCRegWr, MCALUsrc, MCMemWr, MCMemtoReg, reg7to0, fbZero, fbCarry,
+                      fbOverflow, fbSign, dataMemFile);
     
 end structural;
 

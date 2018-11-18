@@ -25,6 +25,7 @@ entity fatBoi is
         ALUsrc      :  in std_logic;
         MemWr       :  in std_logic;
         MemtoReg    :  in std_logic;
+        Reg7to0     : out std_logic_vector(255 downto 0);
         Zero        : out std_logic;
         Carry       : out std_logic;
         Overflow    : out std_logic;

@@ -20,7 +20,8 @@ entity reg_comp is
         busW    :  in std_logic_vector(31 downto 0);
         clk     :  in std_logic;
         busA    : out std_logic_vector(31 downto 0);
-        busB    : out std_logic_vector(31 downto 0)
+        busB    : out std_logic_vector(31 downto 0);
+        reg7to0: out std_logic_vector(255 downto 0)
     );
 end reg_comp;
 
@@ -97,6 +98,7 @@ architecture structural of reg_comp is
 
         busA <= MuxAOuts(31 downto 0);
         busB <= MuxBOuts(31 downto 0);
+        reg7to0 <= RegOuts(255 downto 0);
 end structural;
 
 

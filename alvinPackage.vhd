@@ -56,7 +56,8 @@ package alvinPackage is
 	         busW    :  in std_logic_vector(31 downto 0);
 	         clk     :  in std_logic;
 	         busA    : out std_logic_vector(31 downto 0);
-	         busB    : out std_logic_vector(31 downto 0)
+	         busB    : out std_logic_vector(31 downto 0);
+	         reg7to0: out std_logic_vector(255 downto 0)
 	     );
 	 end component reg_comp;
 	 
@@ -99,6 +100,7 @@ package alvinPackage is
             ALUsrc      :  in std_logic;
             MemWr       :  in std_logic;
             MemtoReg    :  in std_logic;
+            Reg7to0     : out std_logic_vector(255 downto 0);
             Zero        : out std_logic;
             Carry       : out std_logic;
             Overflow    : out std_logic;
@@ -128,4 +130,14 @@ package alvinPackage is
 	    Branch: out std_logic_vector(1 downto 0)
 	    );
     end component MainControl;
+    
+    component sc_proc is
+        port (
+            clk         :  in std_logic;
+            instMemFile :  string;
+            dataMemFile :  string;
+            pcReset     :  in std_logic;
+            reg7to0     : out std_logic_vector(255 downto 0)
+        );
+    end component sc_proc;
 end;
