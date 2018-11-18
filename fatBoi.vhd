@@ -26,6 +26,8 @@ entity fatBoi is
         MemWr       :  in std_logic;
         MemtoReg    :  in std_logic;
         Reg7to0     : out std_logic_vector(255 downto 0);
+        BussA       : out std_logic_vector(31 downto 0);
+        BussB       : out std_logic_vector(31 downto 0);
         MemWrAdd    : out std_logic_vector(31 downto 0);
         dOut        : out std_logic_vector(31 downto 0);
         Rw          : out std_logic_vector(4 downto 0);
@@ -83,6 +85,8 @@ architecture structural of fatBoi is
         Rw <= destReg;
         dOut <= dataOut;
         MemWrAdd <= ALUout;
+        BussA <= busA;
+        BussB <= busB;
 end structural;
         
         
