@@ -42,7 +42,7 @@ architecture behavioral of InstructionFetchUnitTest is
     testbench: process
     begin
        arst <= '1';
-       wait for 10 ns;
+       wait for 3 ns;
        arst <= '0';
        Branch <= "00";
        Zero <= '0';
