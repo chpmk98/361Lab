@@ -6,6 +6,7 @@ use work.eecs361.all;
 package ALUPackage is
     component final_alu_32_v2 is
 	    port(
+	    shamt : in std_logic_vector(4 downto 0);
 	    a	: in std_logic_vector(31 downto 0);
 	    b	: in std_logic_vector(31 downto 0);
 	    ctrl: in std_logic_vector(3 downto 0);

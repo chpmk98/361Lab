@@ -4,6 +4,7 @@ use work.eecs361.all;
 
 entity final_alu_32_v2 is
 	port(
+  shamt : in std_logic_vector(4 downto 0);
 	a	: in std_logic_vector(31 downto 0);
 	b	: in std_logic_vector(31 downto 0);
 	ctrl: in std_logic_vector(3 downto 0);
@@ -95,7 +96,7 @@ begin
     --0111 sltu
     --1000 sll
     ALU_OUT1: alu_32_v2 port map(a,b,ctrl,alu_im,cout_im,ovflow_im);
-    SLL_OUT: shift_32 port map(a,b(4 downto 0),sll_im);
+    SLL_OUT: shift_32 port map(b,shamt(4 downto 0),sll_im);
     
     SEL_OUT: mux_32 port map(ctrl(3),alu_im,sll_im,s_0);
     
