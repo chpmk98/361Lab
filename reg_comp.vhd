@@ -21,7 +21,7 @@ entity reg_comp is
         clk     :  in std_logic;
         busA    : out std_logic_vector(31 downto 0);
         busB    : out std_logic_vector(31 downto 0);
-        reg7to0: out std_logic_vector(255 downto 0)
+        reg7to0 : out std_logic_vector(255 downto 0)
     );
 end reg_comp;
 

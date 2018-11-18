@@ -26,6 +26,9 @@ entity fatBoi is
         MemWr       :  in std_logic;
         MemtoReg    :  in std_logic;
         Reg7to0     : out std_logic_vector(255 downto 0);
+        MemWrAdd    : out std_logic_vector(31 downto 0);
+        dOut        : out std_logic_vector(31 downto 0);
+        Rw          : out std_logic_vector(4 downto 0);
         Zero        : out std_logic;
         Carry       : out std_logic;
         Overflow    : out std_logic;
@@ -52,7 +55,7 @@ architecture structural of fatBoi is
         
         -- Our 32 32-bit registers
         registers : reg_comp
-           port map (RegWr, destReg, Rs, Rt, busW, clk, busA, busB);
+           port map (RegWr, destReg, Rs, Rt, busW, clk, busA, busB, Reg7to0);
         
         -- Zero-extends the immediate to 32 bits
         extender : extender_signed
@@ -70,13 +73,16 @@ architecture structural of fatBoi is
         -- Writes perpetually when MemWr is set
         dataMem : sram
            generic map (dMemFile)
-           port map ('1', '0', MemWr, ALUout, busB, dataOut);
+           port map ('1', '1', MemWr, ALUout, busB, dataOut);
         
         -- Selects the signal to be written back to the registers
         mem2regMux : mux_32
            port map (MemtoReg, ALUout, dataOut, busW);
                
         Sign <= ALUout(31);
+        Rw <= destReg;
+        dOut <= dataOut;
+        MemWrAdd <= ALUout;
 end structural;
         
         

@@ -16,7 +16,12 @@ entity sc_proc is
         dataMemFile :  string;
         pcReset     :  in std_logic;
         reg7to0     : out std_logic_vector(255 downto 0);
-        instruction : out std_logic_vector(31 downto 0)
+        instruction : out std_logic_vector(31 downto 0);
+        MemWrAdd    : out std_logic_vector(31 downto 0);
+        dOut        : out std_logic_vector(31 downto 0);
+        Rw          : out std_logic_vector(4 downto 0);
+        regWr       : out std_logic;
+        memWr       : out std_logic
     );
 end sc_proc;
 
@@ -48,11 +53,12 @@ architecture structural of sc_proc is
                
         FB  : fatBoi
            port map ( clk, ACALUctr, Inst(25 downto 21), Inst(20 downto 16), Inst(15 downto 11), Inst(10 downto 6),
-                      Inst(15 downto 0), MCRegDst, MCRegWr, MCALUsrc, MCMemWr, MCMemtoReg, reg7to0, fbZero, fbCarry,
+                      Inst(15 downto 0), MCRegDst, MCRegWr, MCALUsrc, MCMemWr, MCMemtoReg, reg7to0, MemWrAdd, dOut, Rw, fbZero, fbCarry,
                       fbOverflow, fbSign, dataMemFile);
                       
         instruction <= Inst;
-    
+        regWr <= MCRegWr;
+        memWr <= MCMemWr;
 end structural;
 
 

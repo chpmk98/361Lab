@@ -101,6 +101,9 @@ package alvinPackage is
             MemWr       :  in std_logic;
             MemtoReg    :  in std_logic;
             Reg7to0     : out std_logic_vector(255 downto 0);
+            dOut        : out std_logic_vector(31 downto 0);
+            MemWrAdd    : out std_logic_vector(31 downto 0);
+            Rw          : out std_logic_vector(4 downto 0);
             Zero        : out std_logic;
             Carry       : out std_logic;
             Overflow    : out std_logic;
@@ -138,7 +141,12 @@ package alvinPackage is
             dataMemFile :  string;
             pcReset     :  in std_logic;
             reg7to0     : out std_logic_vector(255 downto 0);
-            instruction : out std_logic_vector(31 downto 0)
+            instruction : out std_logic_vector(31 downto 0);
+            MemWrAdd    : out std_logic_vector(31 downto 0);
+            dOut        : out std_logic_vector(31 downto 0);
+            Rw          : out std_logic_vector(4 downto 0);
+            regWr       : out std_logic;
+            memWr       : out std_logic
         );
     end component sc_proc;
 end;
