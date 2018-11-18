@@ -12,6 +12,8 @@ entity InstructionFetchUnit is
         Branch: in std_logic_vector(1 downto 0);
         Zero: in std_logic;
         Sign: in std_logic;
+        --PCD: out std_logic_vector(31 downto 0);
+        --BPC: out std_logic_vector(31 downto 0);
         Instruction: out std_logic_vector(31 downto 0);
         InFile: string
     );
@@ -37,6 +39,17 @@ architecture structural of InstructionFetchUnit is
     signal beq_bne_sel: std_logic;
     signal bgtz_sel: std_logic;
     
+    component reg_32_ar is
+        port (
+            inWrite :  in std_logic_vector(31 downto 0);
+            RegWr   :  in std_logic;
+            Rst     :  in std_logic;
+            arst    :  in std_logic;
+            aload   :  in std_logic_vector(31 downto 0);
+            clk     :  in std_logic;
+            Q       : out std_logic_vector(31 downto 0)
+        );
+    end component reg_32_ar;
     
     component add_32 is
 	    port(
@@ -52,7 +65,7 @@ architecture structural of InstructionFetchUnit is
     begin
         PC: reg_32_ar port map(Pcin,'1','0',arst,x"00400020",clk,Pcout);
         
-        Add4toPC: add_32 port map(Pcout,"00000000000000000000000000000100",'0',PCplus4,open,open);
+        Add4toPC: add_32 port map("00000000000000000000000000000100",Pcout,'0',PCplus4,open,open);
         
         extendImm16: extender_signed port map(InstrMemOut(15 downto 0),ExtOut);
         
@@ -73,7 +86,7 @@ architecture structural of InstructionFetchUnit is
         Branchsel1: or_gate port map(beq_sel,bne_sel, beq_bne_sel);
         Branchsel2: or_gate port map(beq_bne_sel,bgtz_sel,BranchSel);
         
-        SelectPC: mux_32 port map(BranchSel,PCplus4, BranchPC,PCin); --select PC when branch condition met
+        SelectPC: mux_32 port map(BranchSel,PCplus4,BranchPC,PCin); --select PC when branch condition met
         
         MakeInstructionMemory: sram 
         generic map(mem_file => InFile)
@@ -86,7 +99,8 @@ architecture structural of InstructionFetchUnit is
         dout => InstrMemOut);
         
         Instruction <= InstrMemOut;     
-        
+        --PCD <= PCout;
+        --BPC <= BranchPC;
                 
         
         

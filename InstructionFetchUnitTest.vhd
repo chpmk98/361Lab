@@ -13,6 +13,8 @@ architecture behavioral of InstructionFetchUnitTest is
     signal Zero: std_logic;
     signal Sign: std_logic;
     signal Instruction: std_logic_vector(31 downto 0);
+    --signal PCD: std_logic_vector(31 downto 0);
+    --signal BranchPC: std_logic_vector(31 downto 0);
     component InstructionFetchUnit is
         port(
             clk: in std_logic;
@@ -20,21 +22,32 @@ architecture behavioral of InstructionFetchUnitTest is
             Branch: in std_logic_vector(1 downto 0);
             Zero: in std_logic;
             Sign: in std_logic;
+            --PCD: out std_logic_vector(31 downto 0);
+            --BPC: out std_logic_vector(31 downto 0);
             Instruction: out std_logic_vector(31 downto 0);
             InFile: string
         );
     end component InstructionFetchUnit;
     begin
     testcomp: InstructionFetchUnit
-    port map(clk,arst,Branch,Zero,Sign,Instruction,"bills_branch.dat");
+    port map(clk,
+    arst,
+    Branch,
+    Zero,
+    Sign,
+    --PCD,
+    --BranchPC,
+    Instruction,
+    "/home/jly965/EECS361/eecs361/data/bills_branch.dat");
     testbench: process
     begin
        arst <= '1';
-       wait for 5 ns;
+       wait for 10 ns;
        arst <= '0';
        Branch <= "00";
        Zero <= '0';
        Sign <= '0';
+       wait;
     end process;
     clk_process: process
     begin
