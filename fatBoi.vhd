@@ -18,6 +18,7 @@ entity fatBoi is
         Rs          :  in std_logic_vector(4 downto 0);
         Rt          :  in std_logic_vector(4 downto 0);
         Rd          :  in std_logic_vector(4 downto 0);
+        Shamt       :  in std_logic_vector(4 downto 0);
         Imm16       :  in std_logic_vector(15 downto 0);
         RegDst      :  in std_logic;
         RegWr       :  in std_logic;
@@ -27,6 +28,7 @@ entity fatBoi is
         Zero        : out std_logic;
         Carry       : out std_logic;
         Overflow    : out std_logic;
+        Sign        : out std_logic;
         dMemFile    :     string
     );
 end fatBoi;
@@ -61,7 +63,7 @@ architecture structural of fatBoi is
         
         -- This is our ALU
         alu_comp : final_alu_32_v2
-           port map (busA, ALUin, ALUctr, ALUout, Zero, Carry, Overflow);
+           port map (Shamt, busA, ALUin, ALUctr, ALUout, Zero, Carry, Overflow);
         
         -- This is our data memory
         -- Writes perpetually when MemWr is set
@@ -72,6 +74,8 @@ architecture structural of fatBoi is
         -- Selects the signal to be written back to the registers
         mem2regMux : mux_32
            port map (MemtoReg, ALUout, dataOut, busW);
+               
+        Sign <= ALUout(31);
 end structural;
         
         

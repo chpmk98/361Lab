@@ -71,6 +71,7 @@ package alvinPackage is
     -- 32-bit ALU
     component final_alu_32_v2 is
 	    port(
+	    shamt : in std_logic_vector(4 downto 0);
 	    a	: in std_logic_vector(31 downto 0);
 	    b	: in std_logic_vector(31 downto 0);
 	    ctrl: in std_logic_vector(3 downto 0);
@@ -91,6 +92,7 @@ package alvinPackage is
             Rs          :  in std_logic_vector(4 downto 0);
             Rt          :  in std_logic_vector(4 downto 0);
             Rd          :  in std_logic_vector(4 downto 0);
+            Shamt       :  in std_logic_vector(4 downto 0);
             Imm16       :  in std_logic_vector(15 downto 0);
             RegDst      :  in std_logic;
             RegWr       :  in std_logic;
@@ -100,7 +102,30 @@ package alvinPackage is
             Zero        : out std_logic;
             Carry       : out std_logic;
             Overflow    : out std_logic;
+            Sign        : out std_logic;
             dMemFile    :     string
         );
     end component fatBoi;
+    
+    component ALU_Control is
+	     port(
+	         func   : in std_logic_vector(5 downto 0);
+	         ALUop  : in std_logic_vector(1 downto 0);
+	         ALUctr : out std_logic_vector(3 downto 0)
+	     );
+	 end component ALU_Control;
+	 
+	 component MainControl is
+	    port(
+	    op: in std_logic_vector(5 downto 0);
+	    ALUop: out std_logic_vector(1 downto 0);
+	    ALUSrc: out std_logic;
+	    RegWr: out std_logic;
+	    RegDst: out std_logic;
+	    ExtOp: out std_logic;
+	    MemWr: out std_logic;
+	    MemtoReg: out std_logic;
+	    Branch: out std_logic_vector(1 downto 0)
+	    );
+    end component MainControl;
 end;
