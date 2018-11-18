@@ -137,7 +137,8 @@ package alvinPackage is
             instMemFile :  string;
             dataMemFile :  string;
             pcReset     :  in std_logic;
-            reg7to0     : out std_logic_vector(255 downto 0)
+            reg7to0     : out std_logic_vector(255 downto 0);
+            instruction : out std_logic_vector(31 downto 0)
         );
     end component sc_proc;
 end;
