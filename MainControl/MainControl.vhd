@@ -26,6 +26,7 @@ signal eq_beq: std_logic;
 signal eq_bne: std_logic;
 signal eq_bgtz: std_logic;
 
+signal alu_src_temp: std_logic;
 signal regwr_temp: std_logic;
 signal regdst_temp: std_logic;
 signal ALUop_i: std_logic;
@@ -64,14 +65,15 @@ begin
 	andlayer5: and_gate_6bit port map(iop(5),iop(4),iop(3),op(2),iop(1),op(0),eq_bne); --bne 0x05 000101
 	andlayer6: and_gate_6bit port map(iop(5),iop(4),iop(3),op(2),op(1),op(0),eq_bgtz); --bgtz 0x07 000111
 
-	RegWr1: or_gate_6bit port map(eq_sw,eq_beq,eq_bne,eq_bgtz,'1','1',regwr_temp);
+	RegWr1: or_gate_6bit port map(eq_sw,eq_beq,eq_bne,eq_bgtz,'0','0',regwr_temp);
 	RegWr2: not_gate port map(regwr_temp,RegWr);
 
 	ExtOp <= '1';
 
-	ALUSrc <= eq_addi;
+   ALUSrc1: or_gate_6bit port map(eq_sw, eq_lw,eq_addi,'0','0','0',alu_src_temp);
+	ALUSrc <= alu_src_temp;
 
-	RegDst1: or_gate_6bit port map(eq_addi,eq_lw,eq_sw,'1','1','1',regdst_temp);
+	RegDst1: or_gate_6bit port map(eq_addi,eq_lw,eq_sw,'0','0','0',regdst_temp);
 	RegDst2: not_gate port map(regdst_temp,RegDst);
 
 	MemWr <= eq_sw;
@@ -83,5 +85,5 @@ begin
 
 	ALUop1b1: or_gate_6bit port map(eq_addi,eq_lw,eq_sw,eq_beq,eq_bne,eq_bgtz,ALUop_i);
 	ALUop1b2: not_gate port map(ALUop_i,ALUop(1));
-	ALUop0b: or_gate_6bit port map(eq_beq,eq_bne,eq_bgtz,'1','1','1',ALUop(0));
+	ALUop0b: or_gate_6bit port map(eq_beq,eq_bne,eq_bgtz,'0','0','0',ALUop(0));
 end architecture structural;
