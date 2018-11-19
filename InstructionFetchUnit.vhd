@@ -27,6 +27,7 @@ architecture structural of InstructionFetchUnit is
     signal PCplusOffset: std_logic_vector(31 downto 0);
     signal InstrMemOut: std_logic_vector(31 downto 0);
     signal ExtOut: std_logic_vector(31 downto 0);
+    signal ImmAdd: std_logic_vector(31 downto 0);
     
     signal BranchPC: std_logic_vector(31 downto 0);
     signal BranchSel: std_logic;
@@ -38,6 +39,7 @@ architecture structural of InstructionFetchUnit is
     signal bne_sel: std_logic;
     signal beq_bne_sel: std_logic;
     signal bgtz_sel: std_logic;
+    signal gtz: std_logic;
     
     component reg_32_ar is
         port (
@@ -68,8 +70,9 @@ architecture structural of InstructionFetchUnit is
         Add4toPC: add_32 port map("00000000000000000000000000000100",Pcout,'0',PCplus4,open,open);
         
         extendImm16: extender_signed port map(InstrMemOut(15 downto 0),ExtOut);
+        leftshiftby2:ImmAdd <= ExtOut(29 downto 0) & "00"; --compensate for the fact that we are recycling 32 bit adders
         
-        BranchCalc: add_32 port map(ExtOut,PCPlus4,'0',BranchPC,open,open);
+        BranchCalc: add_32 port map(ImmAdd,PCPlus4,'0',BranchPC,open,open);
         
         invertBranch: not_gate_n generic map(n => 2) port map(Branch,invBranch);
         OneHot1: and_gate port map(invBranch(1),Branch(0),BranchOneHot(0)); -- Branch == 1
@@ -81,7 +84,8 @@ architecture structural of InstructionFetchUnit is
         
         getBEQ: and_gate port map(BranchOneHot(0),Zero,beq_sel); -- Branch == 1 and Zero == 1
         getBNE: and_gate port map(BranchOneHot(1),notZero,bne_sel); -- Branch == 2 and Zero == 0
-        getBGTZ: and_gate port map(BranchOneHot(2),notSign,bgtz_sel); -- Branch == 3 and Sign == 0
+        setGTZ: and_gate port map(notSign,notZero,gtz);--greater than zero if not nonnegative and not zero
+        getBGTZ: and_gate port map(BranchOneHot(2),gtz,bgtz_sel); -- Branch == 3 and Sign == 0 and Zero == 0
         
         Branchsel1: or_gate port map(beq_sel,bne_sel, beq_bne_sel);
         Branchsel2: or_gate port map(beq_bne_sel,bgtz_sel,BranchSel);

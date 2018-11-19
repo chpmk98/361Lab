@@ -45,7 +45,7 @@ end component;
 
 signal sel3, sel2, sel1, sel0 : std_logic;      -- selection bit for mux when caculating ALUctr for R-type
 
-signal ortemp1, ortemp2, ortemp3, ortemp4,ortemp5,ortemp6,ortemp7,ortemp8,ortemp9 :std_logic;      -- possible combinations of func code for selection bit
+signal ortemp1, ortemp2, ortemp3 :std_logic;      -- possible combinations of func code for selection bit
 
 signal funcout, ALUopout, output : std_logic_vector(3 downto 0);      -- Possible ALUctr outputs
 
@@ -72,16 +72,16 @@ begin
     select2: or_3 port map (ortemp1, ortemp2, ortemp3, sel2);
     mux2: mux port map(sel2,'0', '1', funcout(2));   -- ways to select '1' for 2nd digit of ALUctr
     
-    select11: and_6 port map(func(5), notfunc(4), notfunc(3), func(2), notfunc(1), notfunc(0), ortemp4);   -- func = "100100" 0x24
-    select12: and_6 port map(func(5), notfunc(4), func(3), notfunc(2), func(1), notfunc(0), ortemp5);   -- func = "101010" 0x2a
-    select13: and_6 port map(func(5), notfunc(4), func(3), notfunc(2), func(1), func(0), ortemp6);   -- func = "101011" 0x2b
-    select1: or_3 port map (ortemp4, ortemp5, ortemp6, sel1);
+    select11: and_6 port map(func(5), notfunc(4), notfunc(3), func(2), notfunc(1), notfunc(0), ortemp1);   -- func = "100100" 0x24
+    select12: and_6 port map(func(5), notfunc(4), func(3), notfunc(2), func(1), notfunc(0), ortemp2);   -- func = "101010" 0x2a
+    select13: and_6 port map(func(5), notfunc(4), func(3), notfunc(2), func(1), func(0), ortemp3);   -- func = "101011" 0x2b
+    select1: or_3 port map (ortemp1, ortemp2, ortemp3, sel1);
     mux1: mux port map(sel1,'0', '1', funcout(1));   -- ways to select '1' for 1st digit of ALUctr
     
-    select01: and_6 port map(func(5), notfunc(4), notfunc(3), notfunc(2), func(1), notfunc(0), ortemp7);   -- func = "100010" 0x22
-    select02: and_6 port map(func(5), notfunc(4), notfunc(3), notfunc(2), func(1), func(0), ortemp8);   -- func = "100011" 0x23
-    select03: and_6 port map(func(5), notfunc(4), func(3), notfunc(2), func(1), func(0), ortemp9);   -- func = "101011" 0x2b
-    select0: or_3 port map (ortemp7, ortemp8, ortemp9, sel0);
+    select01: and_6 port map(func(5), notfunc(4), notfunc(3), notfunc(2), func(1), notfunc(0), ortemp1);   -- func = "100010" 0x22
+    select02: and_6 port map(func(5), notfunc(4), notfunc(3), notfunc(2), func(1), func(0), ortemp2);   -- func = "100011" 0x23
+    select03: and_6 port map(func(5), notfunc(4), func(3), notfunc(2), func(1), func(0), ortemp3);   -- func = "101011" 0x2b
+    select0: or_3 port map (ortemp1, ortemp2, ortemp3, sel0);
     mux0: mux port map(sel0,'0', '1', funcout(0));   -- ways to select '1' for 0th digit of ALUctr
     
     

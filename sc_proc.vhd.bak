@@ -20,7 +20,6 @@ entity sc_proc is
         BussA       : out std_logic_vector(31 downto 0);
         BussB       : out std_logic_vector(31 downto 0);
         ALUctr      : out std_logic_vector(3 downto 0);
-        ALUop       : out std_logic_vector(1 downto 0);
         MemWrAdd    : out std_logic_vector(31 downto 0);
         dOut        : out std_logic_vector(31 downto 0);
         Rw          : out std_logic_vector(4 downto 0);
@@ -85,7 +84,6 @@ architecture structural of sc_proc is
         regWr <= MCRegWr;
         memWr <= MCMemWr;
         ALUctr <= ACALUctr;
-        ALUop <= MCALUop;
 end structural;
 
 
