@@ -16,7 +16,7 @@ entity reg_n_ar is
         clk     :  in std_logic;
         Q       : out std_logic_vector(n-1 downto 0)
     );
-end reg_32_ar;
+end entity reg_n_ar;
 
 architecture structural of reg_n_ar is
    signal curQ : std_logic_vector(n-1 downto 0);
