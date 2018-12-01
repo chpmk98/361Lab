@@ -9,6 +9,7 @@ entity IDecodeUnit is
 	port(
 		clk: in std_logic;
 		arst: in std_logic;
+		valid: in std_logic;
 		Instruction: in std_logic_vector(31 downto 0);
 		PCPFour: in std_logic_vector(31 downto 0);
 		InputRegWr: in std_logic;
@@ -38,14 +39,14 @@ signal IFID_Inst: std_logic_vector(31 downto 0);
 signal Rs, Rt, Rd: std_logic_vector(4 downto 0);
 begin
 	IFIDReg1: reg_n_ar generic map(n => 32) port map(inWrite => Instruction,
-													RegWr => '1',
+													RegWr => valid,
 													Rst => '0',
 													arst => arst,
 													aload => x"00000000",
 													clk => clk,
 													Q => IFID_Inst);
 	IFIDReg2: reg_n_ar generic map(n => 32) port map(inWrite => PCPFour,
-													RegWr => '1',
+													RegWr => valid,
 													Rst => '0',
 													arst => arst,
 													aload => x"00000000",
