@@ -4,7 +4,7 @@ use work.eecs361_gates.all;
 use work.eecs361.all;
 use work.alvinPackage.all;
 
-entity IFetchUnit.vhd is
+entity IFetchUnit is
     port(
         clk: in std_logic;
         arst: in std_logic; -- resets the PC to 0x00400020
@@ -12,6 +12,7 @@ entity IFetchUnit.vhd is
         Zero: in std_logic;
         Sign: in std_logic;
         Stall: in std_logic; -- stop PC from updating if there is a stall
+        BranchPC: in std_logic_vector(31 downto 0);
         PCD: out std_logic_vector(31 downto 0);
         PCPFour: out std_logic_vector(31 downto 0);
         --BPC: out std_logic_vector(31 downto 0);
@@ -30,7 +31,6 @@ architecture structural of IFetchUnit is
     signal ExtOut: std_logic_vector(31 downto 0);
     signal ImmAdd: std_logic_vector(31 downto 0);
     
-    signal BranchPC: std_logic_vector(31 downto 0);
     signal BranchSel: std_logic;
     signal invBranch: std_logic_vector(1 downto 0);
     signal BranchOneHot: std_logic_vector(2 downto 0);
@@ -69,11 +69,6 @@ architecture structural of IFetchUnit is
         PC: reg_32_ar port map(Pcin,Stall,'0',arst,x"00400020",clk,Pcout);
         
         Add4toPC: add_32 port map("00000000000000000000000000000100",Pcout,'0',PCplus4,open,open);
-        
-        extendImm16: extender_signed port map(InstrMemOut(15 downto 0),ExtOut);
-        leftshiftby2:ImmAdd <= ExtOut(29 downto 0) & "00"; --compensate for the fact that we are recycling 32 bit adders
-        
-        BranchCalc: add_32 port map(ImmAdd,PCPlus4,'0',BranchPC,open,open);
         
         invertBranch: not_gate_n generic map(n => 2) port map(Branch,invBranch);
         OneHot1: and_gate port map(invBranch(1),Branch(0),BranchOneHot(0)); -- Branch == 1
