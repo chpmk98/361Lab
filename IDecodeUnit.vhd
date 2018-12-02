@@ -37,7 +37,9 @@ architecture structural of IDecodeUnit is
 signal ALUop: std_logic_vector(1 downto 0);
 signal IFID_Inst: std_logic_vector(31 downto 0);
 signal Rs, Rt, Rd: std_logic_vector(4 downto 0);
+signal invclk: std_logic;
 begin
+    NOTCLOCK: not_gate port map(clk, invclk);
 	IFIDReg1: reg_n_ar generic map(n => 32) port map(inWrite => Instruction,
 													RegWr => valid,
 													Rst => '0',
