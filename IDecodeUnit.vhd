@@ -9,13 +9,14 @@ entity IDecodeUnit is
 	port(
 		clk: in std_logic;
 		arst: in std_logic;
-		valid: in std_logic;
-		Instruction: in std_logic_vector(31 downto 0);
+		IFIDWrite: in std_logic;
+		Instruction: in std_logic_vector(31 downto 0); --instruction from the IF stage
 		PCPFour: in std_logic_vector(31 downto 0);
 		InputRegWr: in std_logic;
 		InputRw: in std_logic_vector(4 downto 0);
 		InputBusW: in std_logic_vector(31 downto 0);
-		LoadHazard: in std_logic;
+		LoadHazard: in std_logic; --LoadHazard and IFIDWrite should be opposite signals
+		IFFlush: in std_logic; -- IFFlush is the same as BranchSel from Mem stage
 		------------------------------------------------
 		PCPFourOut: out std_logic_vector(31 downto 0);
 		Imm16: out std_logic_vector(15 downto 0);
@@ -58,6 +59,7 @@ signal	MemtoReg_t: std_logic;
 signal	RegWr_t: std_logic;
 signal	BusAOut_t: std_logic_vector(31 downto 0);
 signal	BusBOut_t: std_logic_vector(31 downto 0);
+signal flush_reg: std_logic;
 
 component regCompare is
     port(
@@ -69,26 +71,28 @@ end component regCompare;
 begin
    --just in case
    NOTCLOCK: not_gate port map(clk, invclk);
+   --make IFID Register
+   RST_LOGIC: or_gate port map(arst,IFFlush,flush_reg);
 	IFIDReg1: reg_n_ar generic map(n => 32) port map(inWrite => Instruction,
-													RegWr => valid,
-													Rst => arst,
+													RegWr => IFIDWrite,
+													Rst => flush_reg,
 													arst => '0',
 													aload => IFID_Inst,
 													clk => clk,
 													Q => IFID_Inst);
 	IFIDReg2: reg_n_ar generic map(n => 32) port map(inWrite => PCPFour,
-													RegWr => valid,
-													Rst => arst,
+													RegWr => IFIDWrite,
+													Rst => flush_reg,
 													arst => '0',
 													aload => IFID_Inst,
 													clk => clk,
-													Q => PCPFourOut);
+													Q => PCPFourOut_t);
+	--extract codes from instruction
 	Rs <= IFID_Inst(25 downto 21);
 	Rt <= IFID_Inst(20 downto 16);
 	Rd <= IFID_Inst(15 downto 11);
 	Imm16_t <= IFID_Inst(15 downto 0);
-	Rtout <= Rt;
-	Rdout <= Rd;
+	--throw the codes into Control Units
 	MainFlags: MainControl port map(op => IFID_Inst(31 downto 26),
             						ALUop => ALUop,
             						ALUSrc => ALUSrc_t,
@@ -102,7 +106,7 @@ begin
     ALUFlags: ALU_Control port map(func => IFID_Inst(5 downto 0),
     							  ALUop => ALuop,
     							  ALUCtr => ALUCtr_t);
-
+   	--registers get values from WB stage, and read values from IFID Register
     makeRegisters: reg_comp port map(RegWr => InputRegWr,
         							 Rw => InputRw,
         							 Ra => Rs,
@@ -115,15 +119,15 @@ begin
         							 );
 	 --Forward From WB stage in case we are reading and writing to same register
 	 makeFWRegA0: regCompare port map(Rs,InputRw, compA);
-	 makeFWRegA1: and_gate port map(compA, MemWr_t,FWRegA);
+	 makeFWRegA1: and_gate port map(compA, InputRegWr,FWRegA);
 	 
 	 makeFWRegB0: regCompare port map(Rt, InputRw, compB);
-	 makeFWRegB1: and_gate port map(compB, MemWr_t, FWRegB);
+	 makeFWRegB1: and_gate port map(compB, InputRegWr, FWRegB);
 	 
 	 busASelect: mux_32 port map(FWRegA, BusA, InputBusW,BusAOut_t);
 	 busBSelect: mux_32 port map(FWRegB, BusB, InputBusW,BusBOut_t);
 	 
-	 --Mux for stalling
+	 --Mux for stalling zeros out everything if stall flag occurs
 	 mux_in <= PCPFourOut_t &
               Imm16_t &
               Rt &
@@ -137,7 +141,10 @@ begin
               RegWr_t &
               BusAOut_t &
               BusBOut_t;
-	 stallmux: mux_n generic map(n => 133) port map(LoadHazard,mux_in,x"00000000",mux_out);
+    --if LoadHazard flag is raised if stall is needed
+	 stallmux: mux_n generic map(n => 133) port map(LoadHazard,mux_in,
+	 "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+	 mux_out); --lol there's probably an easier way to represent 0 in 133 bits
 	 
 	 PCPFourOut <= mux_out(132 downto 101);
     Imm16 <= mux_out(100 downto 85);

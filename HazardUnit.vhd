@@ -11,7 +11,8 @@ entity HazardUnit is
         IFID_Rs: in std_logic_vector(4 downto 0);
         IFID_Rt: in std_logic_vector(4 downto 0);
         PCWrite: out std_logic;
-        Stall: out std_logic
+        IFIDWrite: out std_logic;
+        LoadHazard: out std_logic
     );
 end entity HazardUnit;
 
@@ -33,9 +34,12 @@ architecture structural of HazardUnit is
         test2: regCompare port map(IDEX_Rt,IFID_Rt, regCollision2);
         Ortest: or_gate port map(regCollision1,regCollision2, tmp);
         
+        --if notPCWrite evaluates to true, we need to stall the pipeline
         stallgate: and_gate port map(tmp,IDEX_MemRead,notPCWrite);
         stallgate2: not_gate port map(notPCWrite,PCWrite);
+        --stalling means PCWrite and IFIDWrite get set to 0 if notPCWrite gets set to true
+        IFIDWriteSignal: not_gate port map(notPCWrite,IFIDWrite);
         
-        Stall <= notPCWrite;
+        LoadHazard <= notPCWrite;
         
 end architecture structural;

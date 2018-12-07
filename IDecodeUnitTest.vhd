@@ -29,14 +29,13 @@ architecture behavioral of IDecodeUnitTest is
     signal BusB:  std_logic_vector(31 downto 0);
     signal Reg7to0: std_logic_vector(255 downto 0);
     signal TempRegOut: std_logic_vector(31 downto 0);
+    signal IFFlush: std_logic;
     component IFetchUnit is
 	     port(
 	         clk: in std_logic;
 	         arst: in std_logic; -- resets the PC to 0x00400020
-	         Branch: in std_logic_vector(1 downto 0);
-	         Zero: in std_logic;
-	         Sign: in std_logic;
 	         PCWrite: in std_logic; -- stop PC from updating if there is a stall
+	         BranchSel: in std_logic;
 	         BranchPC: in std_logic_vector(31 downto 0);
 	         PCD: out std_logic_vector(31 downto 0);
 	         PCPFour: out std_logic_vector(31 downto 0);
@@ -50,12 +49,14 @@ architecture behavioral of IDecodeUnitTest is
 		 port(
 			 clk: in std_logic;
 			 arst: in std_logic;
-			 valid: in std_logic;
+			 IFIDWrite: in std_logic;
 			 Instruction: in std_logic_vector(31 downto 0);
 			 PCPFour: in std_logic_vector(31 downto 0);
 			 InputRegWr: in std_logic;
 			 InputRw: in std_logic_vector(4 downto 0);
 			 InputBusW: in std_logic_vector(31 downto 0);
+			 LoadHazard: in std_logic;
+			 IFFlush: in std_logic;
 			 ------------------------------------------------
 			 PCPFourOut: out std_logic_vector(31 downto 0);
 			 Imm16: out std_logic_vector(15 downto 0);
@@ -68,8 +69,8 @@ architecture behavioral of IDecodeUnitTest is
 			 Branch: out std_logic_vector(1 downto 0);
 			 MemtoReg: out std_logic;
 			 RegWr: out std_logic;
-			 BusA: out std_logic_vector(31 downto 0);
-			 BusB: out std_logic_vector(31 downto 0);
+			 BusAOut: out std_logic_vector(31 downto 0);
+			 BusBOut: out std_logic_vector(31 downto 0);
 			 Reg7to0: out std_logic_vector(255 downto 0)
 		 );
 	 end component IDecodeUnit;
@@ -77,28 +78,28 @@ architecture behavioral of IDecodeUnitTest is
     begin
     testcomp: IFetchUnit
     port map(
-    clk,
-    arst,
-    "00",
-    '0',
-    '0',
-    '1',
+    clk => clk,
+    arst => arst,
+    PCWrite => '1',
+    BranchSel => '0',
     --PCD,
-    x"00000000",
-    PCD,
-    PCPFour,
-    Instruction,
-    "/home/jly965/EECS361/eecs361/data/bills_branch.dat");
+    BranchPC => x"00000000",
+    PCD => PCD,
+    PCPFour => PCPFour,
+    Instruction => Instruction,
+    InFile => "/home/jly965/EECS361/eecs361/data/bills_branch.dat");
     decodecomp: IDecodeUnit
     port map(
 	    clk => clk,
 	    arst => arst,
-	    valid => '1',
+	    IFIDWrite => '1',
 	    Instruction => Instruction,
 	    PCPFour => PCPFour,
 	    InputRegWr => '1',
 	    InputRw => "00001",
 	    InputBusW => x"00000001",
+	    LoadHazard => '0',
+	    IFFlush => IFFlush,
 	    ------------------------------------------------
 	    PCPFourOut => PCPFourOut,
 	    Imm16 => Imm16,
@@ -111,8 +112,8 @@ architecture behavioral of IDecodeUnitTest is
 	    Branch => Branch,
 	    MemtoReg => MemtoReg,
 	    RegWr => RegWr,
-	    BusA => BusA,
-	    BusB => BusB,
+	    BusAOut => BusA,
+	    BusBOut => BusB,
 	    Reg7to0 => Reg7to0
     );
     tempreg: reg_n_ar
@@ -134,6 +135,10 @@ architecture behavioral of IDecodeUnitTest is
        
        wait for 3 ns;
        arst <= '0';
+       wait for 17 ns;
+       IFFlush <= '1';
+       wait for 4 ns;
+       IFFlush <= '0';
        wait;
     end process;
     clk_process: process
