@@ -38,6 +38,9 @@ entity EXunit is
         Branch    :  in std_logic_vector(1 downto 0);
         BusA      :  in std_logic_vector(31 downto 0);
         BusB      :  in std_logic_vector(31 downto 0);
+        -- Values from the forwarding unit
+        BusAFor   :  in std_logic_vector(31 downto 0);
+        BusBFor   :  in std_logic_vector(31 downto 0);
         -- Debugging material
         Reg7to0in :  in std_logic_vector(255 downto 0);
         -----------------------------------------------
@@ -47,6 +50,7 @@ entity EXunit is
         -- Information for Data Memory access
         MemWrout  : out std_logic;
         ALUout    : out std_logic_vector(31 downto 0);
+        BusAOut   : out std_logic_vector(31 downto 0);
         BusBout   : out std_logic_vector(31 downto 0);
         -- Information for Writeback
         MemtoRegO : out std_logic;
@@ -110,12 +114,12 @@ architecture structural of EXunit is
 
     -- Selects the second input to the ALU
     aluMux     : mux_32
-       port map (IDregM(100), IDregM(31 downto 0), extImm, ALUin);
+       port map (IDregM(100), BusBFor, extImm, ALUin);
        --port map (ALUsrc, BusB, extImm, ALUin);
     
     -- This is our ALU
     alu_comp   : final_alu_32_v2
-       port map (IDregM(123 downto 119), IDregM(63 downto 32), ALUin, IDregM(137 downto 134), ALUout, Zero, Carry, Overflow);
+       port map (IDregM(123 downto 119), BusAFor, ALUin, IDregM(137 downto 134), ALUout, Zero, Carry, Overflow);
        --port map (Shamt, BusA, ALUin, ALUctr, ALUout, Zero, Carry, Overflow);
            
     -- This is our adder for branch target calculation
@@ -137,7 +141,9 @@ architecture structural of EXunit is
     --BranchO <= Branch;
 
     -- Gives input data to MemWr stage for memory access purposes
+    --  and exposes BusA and BusB for the Funit
     MemWrout <= IDregM(99);
+    BusAout <= IDregM(63 downto 32);
     BusBout <= IDregM(31 downto 0);
     --MemWrout <= MemWr;
     --BusBout <= BusB;

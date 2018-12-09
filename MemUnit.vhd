@@ -12,7 +12,8 @@ entity MemUnit is
         BranchPC : in std_logic_vector (31 downto 0);
         BusB : in std_logic_vector (31 downto 0);
         ALUin : in std_logic_vector (31 downto 0);
-        Rw : in std_logic_vector (31 downto 0);
+        Rw : in std_logic_vector (4 downto 0);         -- NOTE: FIX ALL THE NUMBERINGS
+        WrEX : in std_logic;
         MemWR : in std_logic;
         RegWR : in std_logic;
         Branch : in std_logic_vector (1 downto 0);
@@ -28,7 +29,8 @@ entity MemUnit is
         --------Outputs--------
         Dout : out std_logic_vector (31 downto 0);
         ALUout : out std_logic_vector (31 downto 0);
-        RegWR_out : out std_logic
+        RegWR_out : out std_logic;
+        WrEXO   : out std_logic
         );
 end entity MemUnit;
         
@@ -55,6 +57,8 @@ architecture structural of MemUnit is
     signal bgtz_sel: std_logic;
     signal gtz: std_logic;
     
+    signal fwRegM : std_logic;
+    
     begin
         reg_in <= Branch & Zero & Sign & RegWR & BranchPC & BusB & ALUin & Rw & MemWR;
         
@@ -68,13 +72,20 @@ architecture structural of MemUnit is
         Rw_t <= reg_out (32 downto 1);
         MemWR_t <= reg_out (0); 
         
-        ALUout <= ALUin;
+        ALUout <= reg_out(37 downto 6);
+        --ALUout <= ALUin;
         regWR_out <= RegWR_t;
         
-        makeregister: reg_n_ar generic map(n => 129) port map(inWrite => reg_in,
+        -- Stores WrEX for forwarding purposes
+        forwardingReg: reg_n_ar
+           generic map (n => 1)
+           port map (WrEX, MemWR, arst, '0', fwRegM, clk, fwRegM);
+        WrEXO <= fwRegM;
+        
+        makeregister: reg_n_ar generic map(n => 134) port map(inWrite => reg_in,
 								                        RegWr => MemWR,
-								                        Rst => '0',
-								                        arst => arst,
+								                        Rst => arst,
+								                        arst => '0',
 								                        aload => x"00000000",
 								                        clk => clk,
 								                        Q => reg_out);
