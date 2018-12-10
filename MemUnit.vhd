@@ -16,7 +16,7 @@ entity MemUnit is
         WrEX : in std_logic;
         MemWR : in std_logic;
         RegWR : in std_logic;
-        MemtoReg : in std_logic;
+        MemtoReg: in std_logic;
         Branch : in std_logic_vector (1 downto 0);
         Zero : in std_logic;
         Sign : in std_logic;
@@ -25,30 +25,33 @@ entity MemUnit is
         arst :in std_logic;
         clk : in std_logic;
         MemFile : in string;
-        BranchSel : out std_logic;
         
         --------Outputs--------
+        BranchSel : out std_logic;
         Dout : out std_logic_vector (31 downto 0);
-        MemtoRegO : out std_logic;
+        MemtoRegO: out std_logic;
         ALUout : out std_logic_vector (31 downto 0);
         RegWR_out : out std_logic;
         WrEXO   : out std_logic;
-        RwO     : out std_logic_vector(4 downto 0)
+        RwO   : out std_logic_vector(4 downto 0)
         );
 end entity MemUnit;
         
 architecture structural of MemUnit is
-    signal Branch_t : std_logic_vector(1 downto 0);
-    signal Zero_t : std_logic;
-    signal Sign_t : std_logic;
-    signal RegWR_t : std_logic;
-    signal EXMEM_MemWr : std_logic_vector (31 downto 0);
-    signal reg_in, reg_out : std_logic_vector (133 downto 0);
     signal BranchPC_t : std_logic_vector (31 downto 0);
     signal BusB_t : std_logic_vector (31 downto 0);
     signal ALUin_t : std_logic_vector (31 downto 0);
-    signal Rw_t : std_logic_vector (31 downto 0);
+    signal Rw_t : std_logic_vector (4 downto 0);         -- NOTE: FIX ALL THE NUMBERINGS
+    signal WrEX_t : std_logic;
     signal MemWR_t : std_logic;
+    signal RegWR_t : std_logic;
+    signal MemtoReg_t: std_logic;
+    signal Branch_t : std_logic_vector (1 downto 0);
+    signal Zero_t : std_logic;
+    signal Sign_t : std_logic;
+    
+    signal reg_in : std_logic_vector(108 downto 0);
+    signal reg_out : std_logic_vector(108 downto 0);
     
     signal invBranch: std_logic_vector(1 downto 0);
     signal BranchOneHot: std_logic_vector(2 downto 0);
@@ -60,33 +63,28 @@ architecture structural of MemUnit is
     signal bgtz_sel: std_logic;
     signal gtz: std_logic;
     
-    signal fwRegM : std_logic;
-    
     begin
-        reg_in <= Branch & Zero & Sign & RegWR & BranchPC & BusB & ALUin & Rw & MemWR;
+        reg_in <= BranchPC & BusB & ALUin & Rw & WrEX & MemWR & RegWR & MemtoReg & Branch & Zero & Sign;
         
-        Branch_t <= reg_out (133 downto 132);
-        Zero_t <= reg_out (131);
-        Sign_t <= reg_out (130);
-        RegWR_t <= reg_out (129);
-        BranchPC_t <= reg_out (128 downto 97);
-        BusB_t <= reg_out (96 downto 65);
-        ALUin_t <= reg_out (64 downto 33);
-        Rw_t <= reg_out (32 downto 1);
-        MemWR_t <= reg_out (0); 
+        BranchPC_t <= reg_out (108 downto 77);
+        BusB_t <= reg_out (76 downto 45);
+        ALUin_t <= reg_out (44 downto 13);
+        Rw_t <= reg_out (12 downto 8);
+        WrEX_t <= reg_out (7);
+        MemWR_t <= reg_out (6);
+        RegWR_t <= reg_out (5);
+        MemtoReg_t <= reg_out (4);
+        Branch_t <= reg_out (3 downto 2);
+        Zero_t <= reg_out (1);
+        Sign_t <= reg_out (0);
         
-        ALUout <= reg_out(37 downto 6);
-        --ALUout <= ALUin;
-        RegWR_out <= RegWR_t;
+        ALUout <= ALUin_t;
+        regWR_out <= RegWR_t;
         RwO <= Rw_t;
+        WrEXO <= WrEX_t;
+        MemtoRegO <= MemtoReg_t;
         
-        -- Stores WrEX for forwarding purposes
-        forwardingReg: reg_n_ar
-           generic map (n => 1)
-           port map (WrEX, MemWR, arst, '0', fwRegM, clk, fwRegM);
-        WrEXO <= fwRegM;
-        
-        makeregister: reg_n_ar generic map(n => 134) port map(inWrite => reg_in,
+        makeregister: reg_n_ar generic map(n => 109) port map(inWrite => reg_in,
 								                        RegWr => MemWR,
 								                        Rst => arst,
 								                        arst => '0',
