@@ -16,6 +16,7 @@ entity MemUnit is
         WrEX : in std_logic;
         MemWR : in std_logic;
         RegWR : in std_logic;
+        MemtoReg : in std_logic;
         Branch : in std_logic_vector (1 downto 0);
         Zero : in std_logic;
         Sign : in std_logic;
@@ -28,9 +29,11 @@ entity MemUnit is
         
         --------Outputs--------
         Dout : out std_logic_vector (31 downto 0);
+        MemtoRegO : out std_logic;
         ALUout : out std_logic_vector (31 downto 0);
         RegWR_out : out std_logic;
-        WrEXO   : out std_logic
+        WrEXO   : out std_logic;
+        RwO     : out std_logic_vector(4 downto 0)
         );
 end entity MemUnit;
         
@@ -74,7 +77,8 @@ architecture structural of MemUnit is
         
         ALUout <= reg_out(37 downto 6);
         --ALUout <= ALUin;
-        regWR_out <= RegWR_t;
+        RegWR_out <= RegWR_t;
+        RwO <= Rw_t;
         
         -- Stores WrEX for forwarding purposes
         forwardingReg: reg_n_ar

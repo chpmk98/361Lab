@@ -149,15 +149,18 @@ architecture structural of fatPipeline is
 	         MemtoRegO: out std_logic;
 	         ALUout : out std_logic_vector (31 downto 0);
 	         RegWR_out : out std_logic;
-	         WrEXO   : out std_logic
+	         WrEXO   : out std_logic;
+	         RwO   : out std_logic_vector(4 downto 0)
 	         );
 	 end component MemUnit;
 	 
 	 component WBUnit is
 	     port(
 	         --------Inputs--------
+	         clk : in std_logic;
 	         Din : in std_logic_vector (31 downto 0);
 	         ALUin : in std_logic_vector (31 downto 0);
+	         RwIn : in std_logic_vector(4 downto 0);
 	         RegWR : in std_logic;
 	         MemtoReg : in std_logic;
 	         
@@ -230,6 +233,7 @@ architecture structural of fatPipeline is
 	 --Intermediate signals for MEM Stage
 	 signal MEMWBDout, MEMWBALUOut: std_logic_vector(31 downto 0);
     signal MEMWBRegWr, MEMWBWrEx, MemWBMemtoReg: std_logic;
+    signal MEMWBRw: std_logic_vector(4 downto 0);
     --Intermediate Signals for MemWB
     signal WBIDRw: std_logic_vector(4 downto 0);
     signal WBIDRegWr: std_logic;
@@ -357,13 +361,16 @@ architecture structural of fatPipeline is
     MemtoRegO => MemWBMemtoReg,
     ALUout => MEMWBALUout,
     RegWR_out => MEMWBRegWr,
-    WrEXO => MEMWBWrEX
+    WrEXO => MEMWBWrEX,
+    RwO => MEMWBRw
     );
     
 	 makeWbUnit: WBUnit port map(
 	         --------Inputs--------
+	         clk => clk,
 	         Din => MemWbDout,
 	         ALUin => MemWBALUOut,
+	         RwIn => MEMWBRw,
 	         RegWR => MEMWBRegWr,
 	         MemtoReg => MEMWBMemtoReg,
 	         
@@ -394,14 +401,14 @@ architecture structural of fatPipeline is
 	         --  this Funit, and feed the output values from here into EXunit.
 	         Rs => IDEXRs,
 	         Rt => IDEXRt,
-	         BusAin => IDEXBusA,
-	         BusBin => IDEXBusB,
+	         BusAin => EXMEMBusA,                -- These are the BusA and BusB values generated
+	         BusBin => EXMEMBusB,                --  by the ID stage
 	         -- From the EX/Mem register
-	         WrEX => EXMEMWrEx,                  -- Set if BusWEX will be written into RwEX
-	         RwEX => EXMEMRw,
+	         WrEX => MEMWBWrEX,                  -- Set if BusWEX will be written into RwEX
+	         RwEX => MEMWBRw,
 	         BusWEX => MEMWBALUOut,
 	         -- From the Mem/WR register
-	         WrMem => MEMWBWrEx,                    -- Set if BusWMem will be written into RwMem
+	         WrMem => WBIDRegWr,                    -- Set if BusWMem will be written into RwMem
 	         RwMem => WBIDRw,
 	         BusWMem => WBIDBusW,
 	         -------------------------------------------
