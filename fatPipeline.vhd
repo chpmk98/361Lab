@@ -339,7 +339,7 @@ architecture structural of fatPipeline is
 	 
 	 makeMemUnit: MemUnit port map(
 	 BranchPC => EXMEMBranchPC,
-    BusB => EXMEMBusB,
+    BusB => BusBFor, --EXMEMBusB,
     ALUin => EXMEMALUOut,
     Rw => EXMEMRw,        -- NOTE: FIX ALL THE NUMBERINGS
     WrEX => EXMEMWrEx,
