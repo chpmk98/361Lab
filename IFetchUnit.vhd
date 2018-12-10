@@ -11,6 +11,7 @@ entity IFetchUnit is
         PCWrite: in std_logic; -- stop PC from updating if there is a stall
         BranchSel: in std_logic;
         BranchPC: in std_logic_vector(31 downto 0);
+        -----------
         PCD: out std_logic_vector(31 downto 0);
         PCPFour: out std_logic_vector(31 downto 0);
         --BPC: out std_logic_vector(31 downto 0);

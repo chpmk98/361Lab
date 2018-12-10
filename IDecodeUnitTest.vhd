@@ -16,6 +16,7 @@ architecture behavioral of IDecodeUnitTest is
     signal BranchPC: std_logic_vector(31 downto 0);
     signal PCPFourOut: std_logic_vector(31 downto 0);
     signal Imm16:  std_logic_vector(15 downto 0);
+    signal Rsout: std_logic_vector(4 downto 0);
     signal Rtout:  std_logic_vector(4 downto 0);
     signal Rdout:  std_logic_vector(4 downto 0);
     signal ALUSrc:  std_logic;
@@ -60,6 +61,7 @@ architecture behavioral of IDecodeUnitTest is
 			 ------------------------------------------------
 			 PCPFourOut: out std_logic_vector(31 downto 0);
 			 Imm16: out std_logic_vector(15 downto 0);
+			 Rsout: out std_logic_vector(4 downto 0);
 			 Rtout: out std_logic_vector(4 downto 0);
 			 Rdout: out std_logic_vector(4 downto 0);
 			 ALUSrc: out std_logic;
@@ -103,6 +105,7 @@ architecture behavioral of IDecodeUnitTest is
 	    ------------------------------------------------
 	    PCPFourOut => PCPFourOut,
 	    Imm16 => Imm16,
+	    Rsout => Rsout,
 	    Rtout => Rtout,
 	    Rdout => Rdout,
 	    ALUSrc => ALUSrc,

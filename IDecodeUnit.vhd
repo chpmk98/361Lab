@@ -20,6 +20,7 @@ entity IDecodeUnit is
 		------------------------------------------------
 		PCPFourOut: out std_logic_vector(31 downto 0);
 		Imm16: out std_logic_vector(15 downto 0);
+		Rsout: out std_logic_vector(4 downto 0);
 		Rtout: out std_logic_vector(4 downto 0);
 		Rdout: out std_logic_vector(4 downto 0);
 		ALUSrc: out std_logic;
@@ -148,6 +149,7 @@ begin
 	 
 	 PCPFourOut <= mux_out(132 downto 101);
     Imm16 <= mux_out(100 downto 85);
+    RsOut <= Rs;
     Rtout <= mux_out(84 downto 80);
     Rdout  <= mux_out(79 downto 75);
     ALUSrc <= mux_out(74);
@@ -159,4 +161,5 @@ begin
     RegWr <= mux_out(64);
     BusAOut <= mux_out(63 downto 32);
     BusBOut <= mux_out(31 downto 0);
+    
 end architecture structural;

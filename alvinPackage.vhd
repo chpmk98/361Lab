@@ -152,7 +152,48 @@ package alvinPackage is
             dOut        : out std_logic_vector(31 downto 0);
             Rw          : out std_logic_vector(4 downto 0);
             regWr       : out std_logic;
-            memWr       : out std_logic
+            memWr       : out std_logic;
+            PCD         : out std_logic_vector(31 downto 0)
         );
     end component sc_proc;
+    
+    component shift_32 is
+        port(
+           a	: in std_logic_vector(31 downto 0);
+           b	: in std_logic_vector(4 downto 0);
+           s	: out std_logic_vector(31 downto 0)
+        );
+    end component shift_32;
+    
+    component add_32 is
+        port(
+           a_in 	: in std_logic_vector(31 downto 0);
+           b_in	: in std_logic_vector(31 downto 0);
+           c_in : in std_logic;
+           sout	: out std_logic_vector(31 downto 0);
+           cout: out std_logic;
+           oflow: out std_logic
+        );
+    end component add_32;
+    
+    component and_6 is   --6 gate and
+      port (
+        a   : in  std_logic;
+        b   : in  std_logic;
+        c   : in  std_logic;
+        d   : in  std_logic;
+        e   : in  std_logic;
+        f   : in  std_logic;
+        z   : out std_logic
+      );
+    end component and_6;
+    
+    component Funit_ander is
+           port (
+               Wr   :  in std_logic;
+               R    :  in std_logic_vector(4 downto 0);
+               Rw   :  in std_logic_vector(4 downto 0);
+               WrOut: out std_logic
+           );
+     end component Funit_ander;
 end;
