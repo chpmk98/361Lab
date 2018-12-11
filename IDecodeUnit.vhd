@@ -61,6 +61,8 @@ signal	RegWr_t: std_logic;
 signal	BusAOut_t: std_logic_vector(31 downto 0);
 signal	BusBOut_t: std_logic_vector(31 downto 0);
 signal flush_reg: std_logic;
+signal RwNotZero: std_logic;
+signal FWRegA_t, FWRegB_t: std_logic;
 
 component regCompare is
     port(
@@ -119,11 +121,16 @@ begin
         							 reg7to0 => Reg7to0
         							 );
 	 --Forward From WB stage in case we are reading and writing to same register
+	 FWzeroCase: regCompare port map(InputRw, "00000", RwZero);
+	 FWNZ: not_gate port map(RwZero, RwNotZero);
+
 	 makeFWRegA0: regCompare port map(Rs,InputRw, compA);
-	 makeFWRegA1: and_gate port map(compA, InputRegWr,FWRegA);
+	 makeFWRegA1: and_gate port map(compA, InputRegWr,FWRegA_t);
+	 makeFWRegA2: and_gate port map(FWRegA_t, RWNotZero,FWRegA);
 	 
 	 makeFWRegB0: regCompare port map(Rt, InputRw, compB);
-	 makeFWRegB1: and_gate port map(compB, InputRegWr, FWRegB);
+	 makeFWRegB1: and_gate port map(compB, InputRegWr, FWRegB_t);
+	 makeFWRegB2: and_gate port map(FWRegB_t, RWNotZero, FWRegB);
 	 
 	 busASelect: mux_32 port map(FWRegA, BusA, InputBusW,BusAOut_t);
 	 busBSelect: mux_32 port map(FWRegB, BusB, InputBusW,BusBOut_t);
