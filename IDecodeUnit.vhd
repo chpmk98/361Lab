@@ -46,7 +46,7 @@ signal BusA, BusB: std_logic_vector(31 downto 0);
 signal FWRegA: std_logic;
 signal FWRegB: std_logic;
 signal compA, compB: std_logic;
-signal mux_in, mux_out: std_logic_vector(132 downto 0);
+signal mux_in, mux_out: std_logic_vector(2 downto 0);
 signal PCPFourOut_t: std_logic_vector(31 downto 0);
 signal Imm16_t: std_logic_vector(15 downto 0);
 signal Rtout_t: std_logic_vector(4 downto 0);
@@ -129,37 +129,25 @@ begin
 	 busBSelect: mux_32 port map(FWRegB, BusB, InputBusW,BusBOut_t);
 	 
 	 --Mux for stalling zeros out everything if stall flag occurs
-	 mux_in <= PCPFourOut_t &
-              Imm16_t &
-              Rt &
-              Rd &
-              ALUSrc_t &
-              ALUCtr_t &  
-              RegDst_t &
-              MemWr_t & 
-              Branch_t &
+	 mux_in <= MemWr_t & 
               MemtoReg_t &
-              RegWr_t &
-              BusAOut_t &
-              BusBOut_t;
+              RegWr_t;
     --if LoadHazard flag is raised if stall is needed
-	 stallmux: mux_n generic map(n => 133) port map(LoadHazard,mux_in,
-	 "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-	 mux_out); --lol there's probably an easier way to represent 0 in 133 bits
+	 stallmux: mux_n generic map(n => 3) port map(LoadHazard,mux_in,"000",mux_out);
 	 
-	 PCPFourOut <= mux_out(132 downto 101);
-    Imm16 <= mux_out(100 downto 85);
+	 PCPFourOut <= PCPFourOut_t;
+    Imm16 <= Imm16_t;
     RsOut <= Rs;
-    Rtout <= mux_out(84 downto 80);
-    Rdout  <= mux_out(79 downto 75);
-    ALUSrc <= mux_out(74);
-    ALUCtr <= mux_out(73 downto 70);
-    RegDst <= mux_out(69);
-    MemWr  <= mux_out(68);
-    Branch <= mux_out(67 downto 66);
-    MemtoReg <= mux_out(65);
-    RegWr <= mux_out(64);
-    BusAOut <= mux_out(63 downto 32);
-    BusBOut <= mux_out(31 downto 0);
+    Rtout <= Rt;
+    Rdout  <= Rd;
+    ALUSrc <= ALUSrc_t;
+    ALUCtr <= ALUCtr_t;
+    RegDst <= RegDst_t;
+    MemWr  <= mux_out(2);
+    Branch <= Branch_t;
+    MemtoReg <= mux_out(1);
+    RegWr <= mux_out(0);
+    BusAOut <= BusAOut_t;
+    BusBOut <= BusBOut_t;
     
 end architecture structural;

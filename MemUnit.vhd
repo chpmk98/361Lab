@@ -16,6 +16,7 @@ entity MemUnit is
         WrEX : in std_logic;
         MemWR : in std_logic;
         RegWR : in std_logic;
+        MemtoReg: in std_logic;
         Branch : in std_logic_vector (1 downto 0);
         Zero : in std_logic;
         Sign : in std_logic;
@@ -24,28 +25,34 @@ entity MemUnit is
         arst :in std_logic;
         clk : in std_logic;
         MemFile : in string;
-        BranchSel : out std_logic;
         
         --------Outputs--------
+        BranchPCOut: out std_logic_vector(31 downto 0);
+        BranchSel : out std_logic;
         Dout : out std_logic_vector (31 downto 0);
+        MemtoRegO: out std_logic;
         ALUout : out std_logic_vector (31 downto 0);
         RegWR_out : out std_logic;
-        WrEXO   : out std_logic
+        WrEXO   : out std_logic;
+        RwO   : out std_logic_vector(4 downto 0)
         );
 end entity MemUnit;
         
 architecture structural of MemUnit is
-    signal Branch_t : std_logic_vector(1 downto 0);
-    signal Zero_t : std_logic;
-    signal Sign_t : std_logic;
-    signal RegWR_t : std_logic;
-    signal EXMEM_MemWr : std_logic_vector (31 downto 0);
-    signal reg_in, reg_out : std_logic_vector (133 downto 0);
     signal BranchPC_t : std_logic_vector (31 downto 0);
     signal BusB_t : std_logic_vector (31 downto 0);
     signal ALUin_t : std_logic_vector (31 downto 0);
-    signal Rw_t : std_logic_vector (31 downto 0);
+    signal Rw_t : std_logic_vector (4 downto 0);         -- NOTE: FIX ALL THE NUMBERINGS
+    signal WrEX_t : std_logic;
     signal MemWR_t : std_logic;
+    signal RegWR_t : std_logic;
+    signal MemtoReg_t: std_logic;
+    signal Branch_t : std_logic_vector (1 downto 0);
+    signal Zero_t : std_logic;
+    signal Sign_t : std_logic;
+    
+    signal reg_in : std_logic_vector(108 downto 0);
+    signal reg_out : std_logic_vector(108 downto 0);
     
     signal invBranch: std_logic_vector(1 downto 0);
     signal BranchOneHot: std_logic_vector(2 downto 0);
@@ -57,36 +64,33 @@ architecture structural of MemUnit is
     signal bgtz_sel: std_logic;
     signal gtz: std_logic;
     
-    signal fwRegM : std_logic;
-    
     begin
-        reg_in <= Branch & Zero & Sign & RegWR & BranchPC & BusB & ALUin & Rw & MemWR;
+        reg_in <= BranchPC & BusB & ALUin & Rw & WrEX & MemWR & RegWR & MemtoReg & Branch & Zero & Sign;
         
-        Branch_t <= reg_out (133 downto 132);
-        Zero_t <= reg_out (131);
-        Sign_t <= reg_out (130);
-        RegWR_t <= reg_out (129);
-        BranchPC_t <= reg_out (128 downto 97);
-        BusB_t <= reg_out (96 downto 65);
-        ALUin_t <= reg_out (64 downto 33);
-        Rw_t <= reg_out (32 downto 1);
-        MemWR_t <= reg_out (0); 
+        BranchPC_t <= reg_out (108 downto 77);
+        BusB_t <= reg_out (76 downto 45);
+        ALUin_t <= reg_out (44 downto 13);
+        Rw_t <= reg_out (12 downto 8);
+        WrEX_t <= reg_out (7);
+        MemWR_t <= reg_out (6);
+        RegWR_t <= reg_out (5);
+        MemtoReg_t <= reg_out (4);
+        Branch_t <= reg_out (3 downto 2);
+        Zero_t <= reg_out (1);
+        Sign_t <= reg_out (0);
         
-        ALUout <= reg_out(37 downto 6);
-        --ALUout <= ALUin;
+        ALUout <= ALUin_t;
         regWR_out <= RegWR_t;
+        RwO <= Rw_t;
+        WrEXO <= WrEX_t;
+        MemtoRegO <= MemtoReg_t;
+        BranchPCOut <= BranchPC_t;
         
-        -- Stores WrEX for forwarding purposes
-        forwardingReg: reg_n_ar
-           generic map (n => 1)
-           port map (WrEX, MemWR, arst, '0', fwRegM, clk, fwRegM);
-        WrEXO <= fwRegM;
-        
-        makeregister: reg_n_ar generic map(n => 134) port map(inWrite => reg_in,
-								                        RegWr => MemWR,
+        makeregister: reg_n_ar generic map(n => 109) port map(inWrite => reg_in,
+								                        RegWr => '1',
 								                        Rst => arst,
 								                        arst => '0',
-								                        aload => x"00000000",
+								                        aload => reg_out,
 								                        clk => clk,
 								                        Q => reg_out);
 								                        
@@ -98,15 +102,15 @@ architecture structural of MemUnit is
         din => ALUin_t,
         dout => Dout);
         
-        invertBranch: not_gate_n generic map(n => 2) port map(Branch,invBranch);
-        OneHot1: and_gate port map(invBranch(1),Branch(0),BranchOneHot(0)); -- Branch == 1
-        OneHot2: and_gate port map(Branch(1),invBranch(0),BranchOneHot(1)); -- Branch == 2
-        OneHot3: and_gate port map(Branch(1),Branch(0),BranchOneHot(2));    -- Branch == 3
+        invertBranch: not_gate_n generic map(n => 2) port map(Branch_t,invBranch);
+        OneHot1: and_gate port map(invBranch(1),Branch_t(0),BranchOneHot(0)); -- Branch == 1
+        OneHot2: and_gate port map(Branch_t(1),invBranch(0),BranchOneHot(1)); -- Branch == 2
+        OneHot3: and_gate port map(Branch_t(1),Branch_t(0),BranchOneHot(2));    -- Branch == 3
         
-        invertZero: not_gate port map(Zero,notZero);
-        invertsign: not_gate port map(Sign,notSign);
+        invertZero: not_gate port map(Zero_t,notZero);
+        invertsign: not_gate port map(Sign_t,notSign);
         
-        getBEQ: and_gate port map(BranchOneHot(0),Zero,beq_sel); -- Branch == 1 and Zero == 1
+        getBEQ: and_gate port map(BranchOneHot(0),Zero_t,beq_sel); -- Branch == 1 and Zero == 1
         getBNE: and_gate port map(BranchOneHot(1),notZero,bne_sel); -- Branch == 2 and Zero == 0
         setGTZ: and_gate port map(notSign,notZero,gtz);--greater than zero if not nonnegative and not zero
         getBGTZ: and_gate port map(BranchOneHot(2),gtz,bgtz_sel); -- Branch == 3 and Sign == 0 and Zero == 0

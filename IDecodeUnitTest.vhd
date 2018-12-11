@@ -140,7 +140,7 @@ architecture behavioral of IDecodeUnitTest is
        arst <= '0';
        wait for 17 ns;
        IFFlush <= '1';
-       wait for 4 ns;
+       wait for 5 ns;
        IFFlush <= '0';
        wait;
     end process;

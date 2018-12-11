@@ -63,7 +63,10 @@ entity EXunit is
         -- Debugging material
         Carry     : out std_logic;
         Overflow  : out std_logic;
-        Reg7to0out: out std_logic_vector(255 downto 0)
+        Reg7to0out: out std_logic_vector(255 downto 0);
+        -------------------------------------------------
+        --Information for Hazard Unit
+        ExMemRt: out std_logic_vector(4 downto 0)
     );
 end EXunit;
 
@@ -132,9 +135,11 @@ architecture structural of EXunit is
     not_comp   : not_gate
        port map (IDregM(98), nMtR);
        --port map (MemtoReg, nMtR);
-    and_comp   : and_gate
-       port map (nMtR, IDregM(101), WrEX);
+    
+    --and_comp   : and_gate
+       --port map (nMtR, IDregM(101), WrEX);
        --port map (nMtR, RegWr, WrEX);
+    WrEX <= IDregM(101);
 
     -- Gives input data to MemWr stage for branch detection purposes
     BranchO <= IDregM(65 downto 64);
