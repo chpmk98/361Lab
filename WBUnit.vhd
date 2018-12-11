@@ -38,8 +38,8 @@ architecture structural of WBUnit is
         Rw <= MWR(6 downto 2); -- RwIn
         
         themux : mux_32 port map (sel => MWR(0), --MemtoReg,
-        src0 => MWR(70 downto 39), --Din,
-        src1 => MWR(38 downto 7), --ALUin,
+        src0 => MWR(38 downto 7), --ALUin,
+        src1 => MWR(70 downto 39), --Din,
         z => Dout);
         
     end architecture structural;

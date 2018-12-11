@@ -9,25 +9,10 @@ entity fatPipeline is
     port(
     clk: in std_logic;
     arst: in std_logic;
-    --Most of this is for debug
     Reg7to0Out: out std_logic_vector(255 downto 0);
-    BranchPCD: out std_logic_vector(31 downto 0);
+    IDImm16: out std_logic_vector(15 downto 0);
     PCD: out std_logic_vector(31 downto 0);
-    IFPCPFour: out std_logic_vector(31 downto 0);
     Inst: out std_logic_vector(31 downto 0);
-    IDPCPFour: out std_logic_vector(31 downto 0);
-    IDImm16 : out std_logic_vector(15 downto 0);
-	 IDRs : out std_logic_vector(4 downto 0);
-	 IDRt : out std_logic_vector(4 downto 0);
-	 IDRd : out std_logic_vector(4 downto 0);
-	 IDAluSrc : out std_logic;
-	 IDRegDst: out std_logic;
-	 IDMemWr : out std_logic;
-	 IDBranch : out std_logic_vector(1 downto 0);
-	 IDMemtoReg : out std_logic;
-	 IDRegWr: out std_logic;
-	 IDBusAOut: out std_logic_vector(31 downto 0);
-	 IDBusBOut: out std_logic_vector(31 downto 0);
     BrSelD : out std_logic;
     RsD: out std_logic_vector(4 downto 0);
     RtD: out std_logic_vector(4 downto 0);
@@ -39,8 +24,6 @@ entity fatPipeline is
     EXRegWr : out std_logic;
     EXRw : out std_logic_vector(4 downto 0);
     EXALUout : out std_logic_vector(31 downto 0);
-    EXBrchTarget: out std_logic_vector(31 downto 0);
-    EXBranch0 : out std_logic_vector(1 downto 0);
     MemRegWr : out std_logic;
     MemRw : out std_logic_vector(4 downto 0);
     MemALUout : out std_logic_vector(31 downto 0);
@@ -154,8 +137,7 @@ architecture structural of fatPipeline is
 	         -- Debugging material
 	         Carry     : out std_logic;
 	         Overflow  : out std_logic;
-	         Reg7to0out: out std_logic_vector(255 downto 0);
-	         EXMEMRt : out std_logic_vector(4 downto 0)
+	         Reg7to0out: out std_logic_vector(255 downto 0)
 	     );
 	 end component EXunit;
 	 
@@ -180,7 +162,6 @@ architecture structural of fatPipeline is
 	         MemFile : in string;
 	         
 	         --------Outputs--------
-	         BranchPCOut: out std_logic_vector(31 downto 0);
 	         BranchSel : out std_logic;
 	         Dout : out std_logic_vector (31 downto 0);
 	         MemtoRegO: out std_logic;
@@ -267,7 +248,6 @@ architecture structural of fatPipeline is
 	 signal EXMEMMemWr,EXMEMRegWr,EXMEMMemtoReg, EXMEMZero,EXMEMCarry,EXMEMOverflow:std_logic;
 	 signal EXMEMRw: std_logic_vector(4 downto 0);
 	 signal EXMEMBranch: std_logic_vector(1 downto 0);
-	 signal EXMEMRt: std_logic_vector(4 downto 0);
 	 --Intermediate signals for MEM Stage
 	 signal MEMWBDout, MEMWBALUOut: std_logic_vector(31 downto 0);
     signal MEMWBRegWr, MEMWBWrEx, MemWBMemtoReg: std_logic;
@@ -287,14 +267,14 @@ architecture structural of fatPipeline is
 								           PCWrite => PCWrite,
 								           BranchSel => BranchSel,
 								           BranchPC => BranchPC,
-								           -------------------------------
 								           PCD => PCD,
 								           PCPFour => IFIDPCPFour,
 								           Instruction => Instruction,
 								           InFile => InFile
 								       );
-	 IFPCPFour <= IFIDPCPFour;     
+								       
 	 Inst <= Instruction;
+	 BrSelD <= BranchSel;
 	 
 	 makeIDecode: IDecodeUnit port map(
 	 clk => clk,
@@ -325,23 +305,14 @@ architecture structural of fatPipeline is
     Reg7to0 => Reg7to0
 	 );
 	 
-	 IDPCPFour <= IDEXPCPFour;
-	 IDImm16 <= IDEXImm16;
-	 IDRs <= IDEXRs;
-	 IDRt <= IDEXRt;
-	 IDRd <= IDEXRd;
-	 IDAluSrc <= IDEXAluSrc;
-	 IDRegDst <= IDEXRegDst;
-	 IDMemWr <= IDEXMemWr;
-	 IDBranch <= IDEXBranch;
-	 IDMemtoReg <= IDEXMemtoReg;
-	 IDRegWr <= IDEXRegWr;
-	 IDBusAOut <= IDEXBusA;
-	 IDBusBOut <= IDEXBusB;
+	 RsD <= IDEXRs;
+	 RtD <= IDEXRt;
+	 RdD <= IDEXRd;
+	 exreset: or_gate port map(arst,BranchSel,EXrst);
 	 
 	 makeExUnit: ExUnit port map(
     clk => clk,
-    arst => arst,
+    arst => EXrst,
     IDEXwrite => '1',
     EXkill => BranchSel,
     ALUctr => IDEXALUCtr,
@@ -388,8 +359,7 @@ architecture structural of fatPipeline is
     -- Debugging material
     Carry => EXMEMCarry,
     Overflow => EXMEMOverflow,
-    Reg7to0out => open,
-    EXMEMRt => EXMEMRt
+    Reg7to0out => open
 	 );
 	 
 	 BusAOG <= EXMEMBusA;
@@ -397,8 +367,6 @@ architecture structural of fatPipeline is
 	 EXRegWr <= EXMEMRegWr;
 	 EXRw <= EXMEMRw;
 	 EXALUout <= EXMEMALUout;
-	 EXBrchTarget <= EXMEMBranchPC;
-	 EXBranch0 <= EXMEMBranch;
 	 
 	 makeMemUnit: MemUnit port map(
 	 BranchPC => EXMEMBranchPC,
@@ -419,7 +387,6 @@ architecture structural of fatPipeline is
     MemFile => InFile,
     
     --------Outputs--------
-    BranchPCOut => BranchPC,
     BranchSel => BranchSel,
     Dout => MEMWBDout,
     MemtoRegO => MemWBMemtoReg,
@@ -428,13 +395,6 @@ architecture structural of fatPipeline is
     WrEXO => MEMWBWrEX,
     RwO => MEMWBRw
     );
-    BranchPCD <= BranchPC;
-    BrSelD <= BranchSel;
-    
-    MemRegWr <= MEMWBRegWr;
-    MemRw <= MEMWBRw;
-    MemALUout <= MEMWBALUout;
-    MemDout <= MEMWBDout;
     
     MemRegWr <= MEMWBRegWr;
     MemRw <= MEMWBRw;
@@ -450,6 +410,7 @@ architecture structural of fatPipeline is
 	         RegWR => MEMWBRegWr,
 	         MemtoReg => MEMWBMemtoReg,
 	         
+	         
 	         --------Outputs--------
 	         RegWR_out => WBIDRegWr,
 	         Dout => WBIDBusW,
@@ -459,11 +420,13 @@ architecture structural of fatPipeline is
 	 WBBusW <= WBIDBusW;
 	 WBRw <= WBIDRw;
 	 
+	 makeIDEXMemread: and_gate port map(IDEXMemtoReg,IDEXRegWr,IDEXMemRead);
+	 
 	 makeHazardUnit: HazardUnit port map(
-	    IDEX_MemRead => EXMEMMemtoReg,
-       IDEX_Rt => EXMEMRt,
-       IFID_Rs => IDEXRs,
-       IFID_Rt => IDEXRt,
+	    IDEX_MemRead => IDEXMemRead,
+       IDEX_Rt => IDEXRt,
+       IFID_Rs => Instruction(25 downto 21),
+       IFID_Rt => Instruction(20 downto 16),
        PCWrite => PCWrite,
        IFIDWrite => IFIDWrite,
        LoadHazard => LoadHazard
