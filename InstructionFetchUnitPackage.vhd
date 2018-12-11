@@ -12,6 +12,7 @@ package InstructionFetchUnitPackage is
             Branch: in std_logic_vector(1 downto 0);
             Zero: in std_logic;
             Sign: in std_logic;
+            PCD: out std_logic_vector(31 downto 0);
             Instruction: out std_logic_vector(31 downto 0);
             InFile: string
         );
