@@ -25,7 +25,8 @@ entity sc_proc is
         dOut        : out std_logic_vector(31 downto 0);
         Rw          : out std_logic_vector(4 downto 0);
         regWr       : out std_logic;
-        memWr       : out std_logic
+        memWr       : out std_logic;
+        PCD         : out std_logic_vector(31 downto 0)
     );
 end sc_proc;
 
@@ -47,7 +48,7 @@ architecture structural of sc_proc is
     
     begin
         IFU : InstructionFetchUnit
-           port map (clk, pcReset, MCbranch, fbZero, fbSign, Inst, instMemFile);
+           port map (clk, pcReset, MCbranch, fbZero, fbSign, PCD, Inst, instMemFile);
                
         MC  : MainControl
            port map (Inst(31 downto 26), MCALUop, MCALUsrc, MCRegWr, MCRegDst, MCExtOp, MCMemWr, MCMemtoReg, MCbranch);

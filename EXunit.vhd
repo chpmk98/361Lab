@@ -47,6 +47,8 @@ entity EXunit is
         -- Information for Forwarding
          -- Note that Rw and ALUout are necessary for forwarding as well
         WrEX      : out std_logic;
+        RsO       : out std_logic_vector(4 downto 0);
+        RtO       : out std_logic_vector(4 downto 0);
         -- Information for Data Memory access
         MemWrout  : out std_logic;
         ALUout    : out std_logic_vector(31 downto 0);
@@ -66,13 +68,13 @@ entity EXunit is
         Reg7to0out: out std_logic_vector(255 downto 0);
         -------------------------------------------------
         --Information for Hazard Unit
-        ExMemRt: out std_logic_vector(4 downto 0)
+        ExMemRt   : out std_logic_vector(4 downto 0)
     );
 end EXunit;
 
 architecture structural of EXunit is
-    signal IDin   : std_logic_vector(137 downto 0);
-    signal IDregM : std_logic_vector(137 downto 0);
+    signal IDin   : std_logic_vector(142 downto 0);
+    signal IDregM : std_logic_vector(142 downto 0);
     signal RegregM: std_logic_vector(255 downto 0);
     signal kill   : std_logic;
     signal extImm : std_logic_vector(31 downto 0);
@@ -88,11 +90,11 @@ architecture structural of EXunit is
        port map (arst, EXkill, kill);
     
     -- Lines up all the inputs into a single large register
-    IDin <= ALUctr & Rt & Rd & Shamt & Imm16 & RegDst & RegWr & ALUsrc & MemWr & MemtoReg & PCPFourOut & Branch & BusA & BusB;
+    IDin <= Rs & ALUctr & Rt & Rd & Shamt & Imm16 & RegDst & RegWr & ALUsrc & MemWr & MemtoReg & PCPFourOut & Branch & BusA & BusB;
     
     -- This is the main register at the beginning of the stage
     IDEXreg    : reg_n_ar
-       generic map (n => 138)
+       generic map (n => 143)
        port map (IDin, IDEXwrite, kill, '0', IDregM, clk, IDregM);
     
     -- Stores the seven registers for debugging purposes
@@ -136,10 +138,13 @@ architecture structural of EXunit is
        port map (IDregM(98), nMtR);
        --port map (MemtoReg, nMtR);
     
+    -- Gives input data to the Funit
     --and_comp   : and_gate
        --port map (nMtR, IDregM(101), WrEX);
        --port map (nMtR, RegWr, WrEX);
     WrEX <= IDregM(101);
+    RsO <= IDregM(142 downto 138);
+    ExMemRt <= IDregM(133 downto 129);
 
     -- Gives input data to MemWr stage for branch detection purposes
     BranchO <= IDregM(65 downto 64);

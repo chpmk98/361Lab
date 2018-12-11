@@ -101,63 +101,66 @@ architecture structural of fatPipeline is
 	 end component IDecodeUnit;
 	 
 	 component EXunit is
-	     port (
-	         -- For controlling the ID/EX register
-	         clk       :  in std_logic;
-	         arst      :  in std_logic;
-	         IDEXwrite :  in std_logic;
-	         EXkill    :  in std_logic; -- To be same as BranchSel from Mem stage
-	         -- To be stored in the ID/EX register
-	            -- Normal fatBoi stuff
-	         ALUctr    :  in std_logic_vector(3 downto 0);
-	            -- Rs and Rt are unnecessary for subsequent stages.
-	            -- The values for busA and busB will be calculated in Funit,
-	            --  which should take in Rs and Rt.
-	            -- However, Rd is still necessary for WB and forwarding.
-	         Rs        :  in std_logic_vector(4 downto 0);
-	         Rt        :  in std_logic_vector(4 downto 0);
-	         Rd        :  in std_logic_vector(4 downto 0);
-	         Shamt     :  in std_logic_vector(4 downto 0);
-	         Imm16     :  in std_logic_vector(15 downto 0);
-	         RegDst    :  in std_logic;
-	         RegWr     :  in std_logic;
-	         ALUsrc    :  in std_logic;
-	         MemWr     :  in std_logic;
-	         MemtoReg  :  in std_logic;
-	            -- Weird IDunit stuff
-	         PCPFourOut:  in std_logic_vector(31 downto 0);
-	         Branch    :  in std_logic_vector(1 downto 0);
-	         BusA      :  in std_logic_vector(31 downto 0);
-	         BusB      :  in std_logic_vector(31 downto 0);
-	         -- Values from the forwarding unit
-	         BusAFor   :  in std_logic_vector(31 downto 0);
-	         BusBFor   :  in std_logic_vector(31 downto 0);
-	         -- Debugging material
-	         Reg7to0in :  in std_logic_vector(255 downto 0);
-	         ----------------------------------------------
-	         -- Information for Forwarding
-	          -- Note that Rw and ALUout are necessary for forwarding as well
-	         WrEX      : out std_logic;
-	         -- Information for Data Memory access
-	         MemWrout  : out std_logic;
-	         ALUout    : out std_logic_vector(31 downto 0);
-	         BusAOut   : out std_logic_vector(31 downto 0);
-	         BusBout   : out std_logic_vector(31 downto 0);
-	         -- Information for Writeback
-	         MemtoRegO : out std_logic;
-	         RegWrO    : out std_logic;
-	         Rw        : out std_logic_vector(4 downto 0);
-	         -- Information for Branch detection
-	         BrchTarget: out std_logic_vector(31 downto 0);
-	         BranchO   : out std_logic_vector(1 downto 0);
-			   Zero      : out std_logic;
-	         -- Debugging material
-	         Carry     : out std_logic;
-	         Overflow  : out std_logic;
-	         Reg7to0out: out std_logic_vector(255 downto 0);
-	         EXMEMRt : out std_logic_vector(4 downto 0)
-	     );
-	 end component EXunit;
+        port (
+            -- For controlling the ID/EX register
+            clk       :  in std_logic;
+            arst      :  in std_logic;
+            IDEXwrite :  in std_logic;
+            EXkill    :  in std_logic; -- To be same as BranchSel from Mem stage
+            -- To be stored in the ID/EX register
+               -- Normal fatBoi stuff
+            ALUctr    :  in std_logic_vector(3 downto 0);
+               -- Rs is unnecessary for subsequent stages.
+               -- The values for busA and busB will be calculated in Funit,
+               --  which should take in Rs and Rt.
+               -- However, Rt and Rd are still necessary for WB and forwarding.
+            Rs        :  in std_logic_vector(4 downto 0);
+            Rt        :  in std_logic_vector(4 downto 0);
+            Rd        :  in std_logic_vector(4 downto 0);
+            Shamt     :  in std_logic_vector(4 downto 0);
+            Imm16     :  in std_logic_vector(15 downto 0);
+            RegDst    :  in std_logic;
+            RegWr     :  in std_logic;
+            ALUsrc    :  in std_logic;
+            MemWr     :  in std_logic;
+            MemtoReg  :  in std_logic;
+               -- Weird IDunit stuff
+            PCPFourOut:  in std_logic_vector(31 downto 0);
+            Branch    :  in std_logic_vector(1 downto 0);
+            BusA      :  in std_logic_vector(31 downto 0);
+            BusB      :  in std_logic_vector(31 downto 0);
+            -- Values from the forwarding unit
+            BusAFor   :  in std_logic_vector(31 downto 0);
+            BusBFor   :  in std_logic_vector(31 downto 0);
+            -- Debugging material
+            Reg7to0in :  in std_logic_vector(255 downto 0);
+            -----------------------------------------------
+            -- Information for Forwarding
+             -- Note that Rw and ALUout are necessary for forwarding as well
+            WrEX      : out std_logic;
+            RsO       : out std_logic_vector(4 downto 0);
+            -- Information for Data Memory access
+            MemWrout  : out std_logic;
+            ALUout    : out std_logic_vector(31 downto 0);
+            BusAOut   : out std_logic_vector(31 downto 0);
+            BusBout   : out std_logic_vector(31 downto 0);
+            -- Information for Writeback
+            MemtoRegO : out std_logic;
+            RegWrO    : out std_logic;
+            Rw        : out std_logic_vector(4 downto 0);
+            -- Information for Branch detection
+            BrchTarget: out std_logic_vector(31 downto 0);
+            BranchO   : out std_logic_vector(1 downto 0);
+		      Zero      : out std_logic;
+            -- Debugging material
+            Carry     : out std_logic;
+            Overflow  : out std_logic;
+            Reg7to0out: out std_logic_vector(255 downto 0);
+            -------------------------------------------------
+            --Information for Hazard Unit
+            ExMemRt: out std_logic_vector(4 downto 0)
+        );
+    end component EXunit;
 	 
 	 component MemUnit is
 	     port(
@@ -265,7 +268,7 @@ architecture structural of fatPipeline is
     signal EXMEMWrEx: std_logic;
   	 signal EXMEMALUOut,EXMemBranchPC,EXMEMBusA,EXMEMBusB:std_logic_vector(31 downto 0);
 	 signal EXMEMMemWr,EXMEMRegWr,EXMEMMemtoReg, EXMEMZero,EXMEMCarry,EXMEMOverflow:std_logic;
-	 signal EXMEMRw: std_logic_vector(4 downto 0);
+	 signal EXMEMRw, EXMEMRs: std_logic_vector(4 downto 0);
 	 signal EXMEMBranch: std_logic_vector(1 downto 0);
 	 signal EXMEMRt: std_logic_vector(4 downto 0);
 	 --Intermediate signals for MEM Stage
@@ -372,6 +375,7 @@ architecture structural of fatPipeline is
     -- Information for Forwarding
     -- Note that Rw and ALUout are necessary for forwarding as well
     WrEX => EXMEMWrEx,
+    RsO => EXMEMRs,
     -- Information for Data Memory access
     MemWrout  => EXMEMMemWr,
     ALUout => EXMEMALUOut,
@@ -474,8 +478,8 @@ architecture structural of fatPipeline is
 	         -- Note to future Alvin: Store the following from IDunit in a register
 	         --  outside of EXunit, then feed the values from that register into
 	         --  this Funit, and feed the output values from here into EXunit.
-	         Rs => IDEXRs,
-	         Rt => IDEXRt,
+	         Rs => EXMEMRs,
+	         Rt => EXMEMRt,
 	         BusAin => EXMEMBusA,                -- These are the BusA and BusB values generated
 	         BusBin => EXMEMBusB,                --  by the ID stage
 	         -- From the EX/Mem register

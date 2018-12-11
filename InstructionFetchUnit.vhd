@@ -12,7 +12,7 @@ entity InstructionFetchUnit is
         Branch: in std_logic_vector(1 downto 0);
         Zero: in std_logic;
         Sign: in std_logic;
-        --PCD: out std_logic_vector(31 downto 0);
+        PCD: out std_logic_vector(31 downto 0);
         --BPC: out std_logic_vector(31 downto 0);
         Instruction: out std_logic_vector(31 downto 0);
         InFile: string
@@ -103,7 +103,7 @@ architecture structural of InstructionFetchUnit is
         dout => InstrMemOut);
         
         Instruction <= InstrMemOut;     
-        --PCD <= PCout;
+        PCD <= PCout;
         --BPC <= BranchPC;
                 
         
