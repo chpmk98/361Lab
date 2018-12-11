@@ -29,6 +29,11 @@ entity fatPipeline is
 	 IDRegWr: out std_logic;
 	 IDBusAOut: out std_logic_vector(31 downto 0);
 	 IDBusBOut: out std_logic_vector(31 downto 0);
+    Inst: out std_logic_vector(31 downto 0);
+    BrSelD : out std_logic;
+    RsD: out std_logic_vector(4 downto 0);
+    RtD: out std_logic_vector(4 downto 0);
+    RdD: out std_logic_vector(4 downto 0);
     BusAOG : out std_logic_vector(31 downto 0);
     BusBOG : out std_logic_vector(31 downto 0);
     BusAD : out std_logic_vector(31 downto 0);
@@ -396,7 +401,6 @@ architecture structural of fatPipeline is
 	 EXALUout <= EXMEMALUout;
 	 EXBrchTarget <= EXMEMBranchPC;
 	 EXBranch0 <= EXMEMBranch;
-	 --EXZero => EXMEMZero;
 	 
 	 makeMemUnit: MemUnit port map(
 	 BranchPC => EXMEMBranchPC,
@@ -428,6 +432,11 @@ architecture structural of fatPipeline is
     );
     BranchPCD <= BranchPC;
     BrSelD <= BranchSel;
+    
+    MemRegWr <= MEMWBRegWr;
+    MemRw <= MEMWBRw;
+    MemALUout <= MEMWBALUout;
+    MemDout <= MEMWBDout;
     
     MemRegWr <= MEMWBRegWr;
     MemRw <= MEMWBRw;
