@@ -98,8 +98,8 @@ architecture structural of MemUnit is
         cs => '1',
         oe => '1',
         we => MemWr_t,
-        addr => BusB_t,
-        din => ALUin_t,
+        addr => ALUin_t,
+        din => BusB_t,
         dout => Dout);
         
         invertBranch: not_gate_n generic map(n => 2) port map(Branch_t,invBranch);
