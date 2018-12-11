@@ -85,10 +85,10 @@ architecture structural of MemUnit is
         MemtoRegO <= MemtoReg_t;
         
         makeregister: reg_n_ar generic map(n => 109) port map(inWrite => reg_in,
-								                        RegWr => MemWR,
+								                        RegWr => '1',
 								                        Rst => arst,
 								                        arst => '0',
-								                        aload => x"00000000",
+								                        aload => reg_out,
 								                        clk => clk,
 								                        Q => reg_out);
 								                        

@@ -150,15 +150,15 @@ begin
 	 PCPFourOut <= mux_out(132 downto 101);
     Imm16 <= mux_out(100 downto 85);
     RsOut <= Rs;
-    Rtout <= mux_out(84 downto 80);
-    Rdout  <= mux_out(79 downto 75);
+    Rtout <= Rt;
+    Rdout  <= Rd;
     ALUSrc <= mux_out(74);
     ALUCtr <= mux_out(73 downto 70);
     RegDst <= mux_out(69);
     MemWr  <= mux_out(68);
     Branch <= mux_out(67 downto 66);
-    MemtoReg <= mux_out(65);
-    RegWr <= mux_out(64);
+    MemtoReg <= MemtoReg_t;
+    RegWr <= RegWr_t;
     BusAOut <= mux_out(63 downto 32);
     BusBOut <= mux_out(31 downto 0);
     

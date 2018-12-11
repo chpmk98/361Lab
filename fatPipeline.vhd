@@ -12,8 +12,26 @@ entity fatPipeline is
     Reg7to0Out: out std_logic_vector(255 downto 0);
     IDImm16: out std_logic_vector(15 downto 0);
     PCD: out std_logic_vector(31 downto 0);
+    Inst: out std_logic_vector(31 downto 0);
+    BrSelD : out std_logic;
+    RsD: out std_logic_vector(4 downto 0);
+    RtD: out std_logic_vector(4 downto 0);
+    RdD: out std_logic_vector(4 downto 0);
+    BusAOG : out std_logic_vector(31 downto 0);
+    BusBOG : out std_logic_vector(31 downto 0);
+    BusAD : out std_logic_vector(31 downto 0);
+    BusBD : out std_logic_vector(31 downto 0);
+    EXRegWr : out std_logic;
+    EXRw : out std_logic_vector(4 downto 0);
+    EXALUout : out std_logic_vector(31 downto 0);
+    MemRegWr : out std_logic;
+    MemRw : out std_logic_vector(4 downto 0);
+    MemALUout : out std_logic_vector(31 downto 0);
+    MemDout : out std_logic_vector(31 downto 0);
+  	 WBRegWr: out std_logic;
+	 WBBusW: out std_logic_vector(31 downto 0);
+	 WBRw: out std_logic_vector(4 downto 0);
     InFile: string
-    
     );
 end entity fatPipeline;
 
@@ -254,6 +272,10 @@ architecture structural of fatPipeline is
 								           Instruction => Instruction,
 								           InFile => InFile
 								       );
+								       
+	 Inst <= Instruction;
+	 BrSelD <= BranchSel;
+	 
 	 makeIDecode: IDecodeUnit port map(
 	 clk => clk,
     arst => arst,
@@ -283,6 +305,9 @@ architecture structural of fatPipeline is
     Reg7to0 => Reg7to0
 	 );
 	 
+	 RsD <= IDEXRs;
+	 RtD <= IDEXRt;
+	 RdD <= IDEXRd;
 	 exreset: or_gate port map(arst,BranchSel,EXrst);
 	 
 	 makeExUnit: ExUnit port map(
@@ -337,6 +362,12 @@ architecture structural of fatPipeline is
     Reg7to0out => open
 	 );
 	 
+	 BusAOG <= EXMEMBusA;
+	 BusBOG <= EXMEMBusB;
+	 EXRegWr <= EXMEMRegWr;
+	 EXRw <= EXMEMRw;
+	 EXALUout <= EXMEMALUout;
+	 
 	 makeMemUnit: MemUnit port map(
 	 BranchPC => EXMEMBranchPC,
     BusB => BusBFor, --EXMEMBusB,
@@ -365,6 +396,11 @@ architecture structural of fatPipeline is
     RwO => MEMWBRw
     );
     
+    MemRegWr <= MEMWBRegWr;
+    MemRw <= MEMWBRw;
+    MemALUout <= MEMWBALUout;
+    MemDout <= MEMWBDout;
+    
 	 makeWbUnit: WBUnit port map(
 	         --------Inputs--------
 	         clk => clk,
@@ -379,8 +415,10 @@ architecture structural of fatPipeline is
 	         RegWR_out => WBIDRegWr,
 	         Dout => WBIDBusW,
 	         Rw => WBIDRw
-	         
 	 );
+	 WBRegWr <= WBIDRegWr;
+	 WBBusW <= WBIDBusW;
+	 WBRw <= WBIDRw;
 	 
 	 makeIDEXMemread: and_gate port map(IDEXMemtoReg,IDEXRegWr,IDEXMemRead);
 	 
@@ -415,6 +453,9 @@ architecture structural of fatPipeline is
 	         BusA => BusAFor,
 	         BusB => BusBFor
 	     );
+	 BusAD <= BusAFor;
+	 BusBD <= BusBFor;
+	     
 	 --expose for debug
 	 Reg7to0Out <= Reg7to0;
 	 

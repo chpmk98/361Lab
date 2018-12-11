@@ -132,9 +132,11 @@ architecture structural of EXunit is
     not_comp   : not_gate
        port map (IDregM(98), nMtR);
        --port map (MemtoReg, nMtR);
-    and_comp   : and_gate
-       port map (nMtR, IDregM(101), WrEX);
+    
+    --and_comp   : and_gate
+       --port map (nMtR, IDregM(101), WrEX);
        --port map (nMtR, RegWr, WrEX);
+    WrEX <= IDregM(101);
 
     -- Gives input data to MemWr stage for branch detection purposes
     BranchO <= IDregM(65 downto 64);
