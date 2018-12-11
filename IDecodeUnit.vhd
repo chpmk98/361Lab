@@ -61,7 +61,7 @@ signal	RegWr_t: std_logic;
 signal	BusAOut_t: std_logic_vector(31 downto 0);
 signal	BusBOut_t: std_logic_vector(31 downto 0);
 signal flush_reg: std_logic;
-signal RwNotZero: std_logic;
+signal RWZero, RwNotZero: std_logic;
 signal FWRegA_t, FWRegB_t: std_logic;
 
 component regCompare is
