@@ -15,7 +15,6 @@ entity fatPipeline is
     PCD: out std_logic_vector(31 downto 0);
     IFPCPFour: out std_logic_vector(31 downto 0);
     Inst: out std_logic_vector(31 downto 0);
-    BrSelD : out std_logic;
     IDPCPFour: out std_logic_vector(31 downto 0);
     IDImm16 : out std_logic_vector(15 downto 0);
 	 IDRs : out std_logic_vector(4 downto 0);
@@ -29,7 +28,6 @@ entity fatPipeline is
 	 IDRegWr: out std_logic;
 	 IDBusAOut: out std_logic_vector(31 downto 0);
 	 IDBusBOut: out std_logic_vector(31 downto 0);
-    Inst: out std_logic_vector(31 downto 0);
     BrSelD : out std_logic;
     RsD: out std_logic_vector(4 downto 0);
     RtD: out std_logic_vector(4 downto 0);
