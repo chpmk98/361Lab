@@ -83,6 +83,12 @@ architecture structural of EXunit is
     signal nMtR   : std_logic;
     -- Useless signals generated from the branch adder
     signal Bc, Bo : std_logic;
+    signal invBranch,Branch_t: std_logic_vector(2 downto 0);
+    signal BranchOneHot: std_logic_vector(3 downto 0);
+    signal Zero_t, notZero, notSign, Sign: std_logic;
+    
+    signal beq_sel, bne_sel, beq_bne_sel,bgtz_sel, BranchSel;
+    
     
     begin
     -- Determines whether or not we should reset the register to zeros
@@ -163,6 +169,22 @@ architecture structural of EXunit is
     RegWrO <= IDregM(101);
     --MemtoRegO <= MemtoReg;
     --RegWrO <= RegWr;
+
+    invertBranch: not_gate_n generic map(n => 2) port map(Branch_t,invBranch);
+    OneHot1: and_gate port map(invBranch(1),Branch_t(0),BranchOneHot(0)); -- Branch == 1
+    OneHot2: and_gate port map(Branch_t(1),invBranch(0),BranchOneHot(1)); -- Branch == 2
+    OneHot3: and_gate port map(Branch_t(1),Branch_t(0),BranchOneHot(2));    -- Branch == 3
+        
+    invertZero: not_gate port map(Zero_t,notZero);
+    invertsign: not_gate port map(Sign_t,notSign);
+        
+    getBEQ: and_gate port map(BranchOneHot(0),Zero_t,beq_sel); -- Branch == 1 and Zero == 1
+    getBNE: and_gate port map(BranchOneHot(1),notZero,bne_sel); -- Branch == 2 and Zero == 0
+    setGTZ: and_gate port map(notSign,notZero,gtz);--greater than zero if not nonnegative and not zero
+    getBGTZ: and_gate port map(BranchOneHot(2),gtz,bgtz_sel); -- Branch == 3 and Sign == 0 and Zero == 0
+    
+    Branchsel1: or_gate port map(beq_sel,bne_sel, beq_bne_sel);
+    Branchsel2: or_gate port map(beq_bne_sel,bgtz_sel,BranchSel);
 
 end architecture structural;
 
