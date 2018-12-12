@@ -71,6 +71,7 @@ architecture structural of MemUnit is
         reg_in <= BranchSelIn & BranchPC & BusB & ALUin & Rw & WrEX & MemWR & RegWR & MemtoReg & Branch & Zero & Sign;
         
         BranchSel_t <= reg_out (109);
+
         BranchPC_t <= reg_out (108 downto 77);
         BusB_t <= reg_out (76 downto 45);
         ALUin_t <= reg_out (44 downto 13);
@@ -106,7 +107,9 @@ architecture structural of MemUnit is
         din => BusB_t,
         dout => Dout);
         
+
         BranchSel <= BranchSel_t;
+
         --invertBranch: not_gate_n generic map(n => 2) port map(Branch_t,invBranch);
         --OneHot1: and_gate port map(invBranch(1),Branch_t(0),BranchOneHot(0)); -- Branch == 1
         --OneHot2: and_gate port map(Branch_t(1),invBranch(0),BranchOneHot(1)); -- Branch == 2

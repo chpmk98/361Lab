@@ -98,6 +98,7 @@ architecture structural of EXunit is
     signal beq_bne_sel: std_logic;
     signal bgtz_sel: std_logic;
     signal gtz: std_logic;
+
     
     
     begin
@@ -184,6 +185,22 @@ architecture structural of EXunit is
     Sign_t <= ALUOut_t(31);
     Zero <= Zero_t;
     Branch_t <= IDregM(65 downto 64);
+
+    invertBranch: not_gate_n generic map(n => 2) port map(Branch_t,invBranch);
+    OneHot1: and_gate port map(invBranch(1),Branch_t(0),BranchOneHot(0)); -- Branch == 1
+    OneHot2: and_gate port map(Branch_t(1),invBranch(0),BranchOneHot(1)); -- Branch == 2
+    OneHot3: and_gate port map(Branch_t(1),Branch_t(0),BranchOneHot(2));    -- Branch == 3
+        
+    invertZero: not_gate port map(Zero_t,notZero);
+    invertsign: not_gate port map(Sign_t,notSign);
+        
+    getBEQ: and_gate port map(BranchOneHot(0),Zero_t,beq_sel); -- Branch == 1 and Zero == 1
+    getBNE: and_gate port map(BranchOneHot(1),notZero,bne_sel); -- Branch == 2 and Zero == 0
+    setGTZ: and_gate port map(notSign,notZero,gtz);--greater than zero if not nonnegative and not zero
+    getBGTZ: and_gate port map(BranchOneHot(2),gtz,bgtz_sel); -- Branch == 3 and Sign == 0 and Zero == 0
+    
+    Branchsel1: or_gate port map(beq_sel,bne_sel, beq_bne_sel);
+    Branchsel2: or_gate port map(beq_bne_sel,bgtz_sel,BranchSel);
 
     invertBranch: not_gate_n generic map(n => 2) port map(Branch_t,invBranch);
     OneHot1: and_gate port map(invBranch(1),Branch_t(0),BranchOneHot(0)); -- Branch == 1
