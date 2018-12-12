@@ -132,7 +132,7 @@ architecture behavioral of fatPipeline_test is
            WBRegWr => WBRegWr, 
            WBBusW => WBBusW, 
            WBRw => WBRw, 
-           InFile => "/home/atr7967/eecs361lib_cpu/eecs361/data/sort_corrected_branch.dat");
+           InFile => "/home/atr7967/eecs361lib_cpu/eecs361/data/unsigned_sum.dat");
 
        reg0 <= reg7to0(31 downto 0);
        reg1 <= reg7to0(63 downto 32);

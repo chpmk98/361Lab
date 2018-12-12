@@ -68,7 +68,8 @@ entity EXunit is
         Reg7to0out: out std_logic_vector(255 downto 0);
         -------------------------------------------------
         --Information for Hazard Unit
-        ExMemRt   : out std_logic_vector(4 downto 0)
+        ExMemRt   : out std_logic_vector(4 downto 0);
+        BranchSel : out std_logic
     );
 end EXunit;
 
@@ -83,6 +84,21 @@ architecture structural of EXunit is
     signal nMtR   : std_logic;
     -- Useless signals generated from the branch adder
     signal Bc, Bo : std_logic;
+    signal Branch_t: std_logic_vector(1 downto 0);
+    
+    signal Zero_t, Sign_t: std_logic;
+    
+    signal ALUOut_t: std_logic_vector(31 downto 0); 
+    signal invBranch: std_logic_vector(1 downto 0);
+    signal BranchOneHot: std_logic_vector(2 downto 0);
+    signal notZero: std_logic;
+    signal notSign: std_logic;
+    signal beq_sel: std_logic;
+    signal bne_sel: std_logic;
+    signal beq_bne_sel: std_logic;
+    signal bgtz_sel: std_logic;
+    signal gtz: std_logic;
+    
     
     begin
     -- Determines whether or not we should reset the register to zeros
@@ -124,7 +140,7 @@ architecture structural of EXunit is
     
     -- This is our ALU
     alu_comp   : final_alu_32_v2
-       port map (IDregM(123 downto 119), BusAFor, ALUin, IDregM(137 downto 134), ALUout, Zero, Carry, Overflow);
+       port map (IDregM(123 downto 119), BusAFor, ALUin, IDregM(137 downto 134), ALUout_t, Zero_t, Carry, Overflow);
        --port map (Shamt, BusA, ALUin, ALUctr, ALUout, Zero, Carry, Overflow);
            
     -- This is our adder for branch target calculation
@@ -163,6 +179,27 @@ architecture structural of EXunit is
     RegWrO <= IDregM(101);
     --MemtoRegO <= MemtoReg;
     --RegWrO <= RegWr;
+    
+    ALUOut <= ALUOut_t;
+    Sign_t <= ALUOut_t(31);
+    Zero <= Zero_t;
+    Branch_t <= IDregM(65 downto 64);
+
+    invertBranch: not_gate_n generic map(n => 2) port map(Branch_t,invBranch);
+    OneHot1: and_gate port map(invBranch(1),Branch_t(0),BranchOneHot(0)); -- Branch == 1
+    OneHot2: and_gate port map(Branch_t(1),invBranch(0),BranchOneHot(1)); -- Branch == 2
+    OneHot3: and_gate port map(Branch_t(1),Branch_t(0),BranchOneHot(2));    -- Branch == 3
+        
+    invertZero: not_gate port map(Zero_t,notZero);
+    invertsign: not_gate port map(Sign_t,notSign);
+        
+    getBEQ: and_gate port map(BranchOneHot(0),Zero_t,beq_sel); -- Branch == 1 and Zero == 1
+    getBNE: and_gate port map(BranchOneHot(1),notZero,bne_sel); -- Branch == 2 and Zero == 0
+    setGTZ: and_gate port map(notSign,notZero,gtz);--greater than zero if not nonnegative and not zero
+    getBGTZ: and_gate port map(BranchOneHot(2),gtz,bgtz_sel); -- Branch == 3 and Sign == 0 and Zero == 0
+    
+    Branchsel1: or_gate port map(beq_sel,bne_sel, beq_bne_sel);
+    Branchsel2: or_gate port map(beq_bne_sel,bgtz_sel,BranchSel);
 
 end architecture structural;
 

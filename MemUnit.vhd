@@ -20,6 +20,7 @@ entity MemUnit is
         Branch : in std_logic_vector (1 downto 0);
         Zero : in std_logic;
         Sign : in std_logic;
+        BranchSelIn: in std_logic;
         
         --------Other Inputs--------
         arst :in std_logic;
@@ -51,8 +52,8 @@ architecture structural of MemUnit is
     signal Zero_t : std_logic;
     signal Sign_t : std_logic;
     
-    signal reg_in : std_logic_vector(108 downto 0);
-    signal reg_out : std_logic_vector(108 downto 0);
+    signal reg_in : std_logic_vector(109 downto 0);
+    signal reg_out : std_logic_vector(109 downto 0);
     
     signal invBranch: std_logic_vector(1 downto 0);
     signal BranchOneHot: std_logic_vector(2 downto 0);
@@ -64,9 +65,12 @@ architecture structural of MemUnit is
     signal bgtz_sel: std_logic;
     signal gtz: std_logic;
     
+    signal BranchSel_t: std_logic;
+    
     begin
-        reg_in <= BranchPC & BusB & ALUin & Rw & WrEX & MemWR & RegWR & MemtoReg & Branch & Zero & Sign;
+        reg_in <= BranchSelIn & BranchPC & BusB & ALUin & Rw & WrEX & MemWR & RegWR & MemtoReg & Branch & Zero & Sign;
         
+        BranchSel_t <= reg_out (109);
         BranchPC_t <= reg_out (108 downto 77);
         BusB_t <= reg_out (76 downto 45);
         ALUin_t <= reg_out (44 downto 13);
@@ -86,7 +90,7 @@ architecture structural of MemUnit is
         MemtoRegO <= MemtoReg_t;
         BranchPCOut <= BranchPC_t;
         
-        makeregister: reg_n_ar generic map(n => 109) port map(inWrite => reg_in,
+        makeregister: reg_n_ar generic map(n => 110) port map(inWrite => reg_in,
 								                        RegWr => '1',
 								                        Rst => arst,
 								                        arst => '0',
@@ -102,21 +106,22 @@ architecture structural of MemUnit is
         din => BusB_t,
         dout => Dout);
         
-        invertBranch: not_gate_n generic map(n => 2) port map(Branch_t,invBranch);
-        OneHot1: and_gate port map(invBranch(1),Branch_t(0),BranchOneHot(0)); -- Branch == 1
-        OneHot2: and_gate port map(Branch_t(1),invBranch(0),BranchOneHot(1)); -- Branch == 2
-        OneHot3: and_gate port map(Branch_t(1),Branch_t(0),BranchOneHot(2));    -- Branch == 3
+        BranchSel <= BranchSel_t;
+        --invertBranch: not_gate_n generic map(n => 2) port map(Branch_t,invBranch);
+        --OneHot1: and_gate port map(invBranch(1),Branch_t(0),BranchOneHot(0)); -- Branch == 1
+        --OneHot2: and_gate port map(Branch_t(1),invBranch(0),BranchOneHot(1)); -- Branch == 2
+        --OneHot3: and_gate port map(Branch_t(1),Branch_t(0),BranchOneHot(2));    -- Branch == 3
         
-        invertZero: not_gate port map(Zero_t,notZero);
-        invertsign: not_gate port map(Sign_t,notSign);
+        --invertZero: not_gate port map(Zero_t,notZero);
+        --invertsign: not_gate port map(Sign_t,notSign);
         
-        getBEQ: and_gate port map(BranchOneHot(0),Zero_t,beq_sel); -- Branch == 1 and Zero == 1
-        getBNE: and_gate port map(BranchOneHot(1),notZero,bne_sel); -- Branch == 2 and Zero == 0
-        setGTZ: and_gate port map(notSign,notZero,gtz);--greater than zero if not nonnegative and not zero
-        getBGTZ: and_gate port map(BranchOneHot(2),gtz,bgtz_sel); -- Branch == 3 and Sign == 0 and Zero == 0
+        --getBEQ: and_gate port map(BranchOneHot(0),Zero_t,beq_sel); -- Branch == 1 and Zero == 1
+        --getBNE: and_gate port map(BranchOneHot(1),notZero,bne_sel); -- Branch == 2 and Zero == 0
+        --setGTZ: and_gate port map(notSign,notZero,gtz);--greater than zero if not nonnegative and not zero
+        --getBGTZ: and_gate port map(BranchOneHot(2),gtz,bgtz_sel); -- Branch == 3 and Sign == 0 and Zero == 0
         
-        Branchsel1: or_gate port map(beq_sel,bne_sel, beq_bne_sel);
-        Branchsel2: or_gate port map(beq_bne_sel,bgtz_sel,BranchSel);
+        --Branchsel1: or_gate port map(beq_sel,bne_sel, beq_bne_sel);
+        --Branchsel2: or_gate port map(beq_bne_sel,bgtz_sel,BranchSel);
         
         
 end architecture structural;

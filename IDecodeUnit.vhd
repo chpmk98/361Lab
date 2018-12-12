@@ -76,16 +76,18 @@ begin
    NOTCLOCK: not_gate port map(clk, invclk);
    --make IFID Register
    RST_LOGIC: or_gate port map(arst,IFFlush,flush_reg);
-	IFIDReg1: reg_n_ar generic map(n => 32) port map(inWrite => Instruction,
+	IFIDReg1: reg_n_sync generic map(n => 32) port map(inWrite => Instruction,
+	                                    sFlush => IFFlush,
 													RegWr => IFIDWrite,
-													Rst => flush_reg,
+													Rst => arst,
 													arst => '0',
 													aload => IFID_Inst,
 													clk => clk,
 													Q => IFID_Inst);
-	IFIDReg2: reg_n_ar generic map(n => 32) port map(inWrite => PCPFour,
+	IFIDReg2: reg_n_sync generic map(n => 32) port map(inWrite => PCPFour,
+	                                    sFlush => IFFlush,
 													RegWr => IFIDWrite,
-													Rst => flush_reg,
+													Rst => arst,
 													arst => '0',
 													aload => IFID_Inst,
 													clk => clk,
@@ -141,6 +143,7 @@ begin
               RegWr_t;
     --if LoadHazard flag is raised if stall is needed
 	 stallmux: mux_n generic map(n => 3) port map(LoadHazard,mux_in,"000",mux_out);
+	 stallmux2: mux_n generic map(n => 2) port map (LoadHazard, Branch_t, "00", Branch);
 	 
 	 PCPFourOut <= PCPFourOut_t;
     Imm16 <= Imm16_t;
@@ -151,7 +154,7 @@ begin
     ALUCtr <= ALUCtr_t;
     RegDst <= RegDst_t;
     MemWr  <= mux_out(2);
-    Branch <= Branch_t;
+    --Branch <= Branch_t;
     MemtoReg <= mux_out(1);
     RegWr <= mux_out(0);
     BusAOut <= BusAOut_t;

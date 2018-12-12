@@ -19,4 +19,20 @@ package CtrlUnitsPackage is
         Q       : out std_logic_vector(n-1 downto 0)
     );
     end component reg_n_ar;
+    
+    component reg_n_sync is
+        generic (
+            n : integer
+        );
+        port (
+            inWrite :  in std_logic_vector(n-1 downto 0);
+            sFlush  :  in std_logic;
+            RegWr   :  in std_logic;
+            Rst     :  in std_logic;
+            arst    :  in std_logic;
+            aload   :  in std_logic_vector(n-1 downto 0);
+            clk     :  in std_logic;
+            Q       : out std_logic_vector(n-1 downto 0)
+        );
+    end component reg_n_sync;
 end;

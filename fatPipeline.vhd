@@ -158,7 +158,8 @@ architecture structural of fatPipeline is
             Reg7to0out: out std_logic_vector(255 downto 0);
             -------------------------------------------------
             --Information for Hazard Unit
-            ExMemRt: out std_logic_vector(4 downto 0)
+            ExMemRt: out std_logic_vector(4 downto 0);
+            BranchSel: out std_logic
         );
     end component EXunit;
 	 
@@ -176,6 +177,7 @@ architecture structural of fatPipeline is
 	         Branch : in std_logic_vector (1 downto 0);
 	         Zero : in std_logic;
 	         Sign : in std_logic;
+	         BranchSelIn: in std_logic;
 	         
 	         --------Other Inputs--------
 	         arst :in std_logic;
@@ -271,6 +273,7 @@ architecture structural of fatPipeline is
 	 signal EXMEMRw, EXMEMRs: std_logic_vector(4 downto 0);
 	 signal EXMEMBranch: std_logic_vector(1 downto 0);
 	 signal EXMEMRt: std_logic_vector(4 downto 0);
+	 signal EXMemBranchSel: std_logic;
 	 --Intermediate signals for MEM Stage
 	 signal MEMWBDout, MEMWBALUOut: std_logic_vector(31 downto 0);
     signal MEMWBRegWr, MEMWBWrEx, MemWBMemtoReg: std_logic;
@@ -393,7 +396,8 @@ architecture structural of fatPipeline is
     Carry => EXMEMCarry,
     Overflow => EXMEMOverflow,
     Reg7to0out => open,
-    EXMEMRt => EXMEMRt
+    EXMEMRt => EXMEMRt,
+    BranchSel => EXMEMBranchSel
 	 );
 	 
 	 BusAOG <= EXMEMBusA;
@@ -416,6 +420,7 @@ architecture structural of fatPipeline is
     Branch => EXMEMBranch,
     Zero => EXMemZero,
     Sign => EXMEMALUout(31),
+    BranchSelIn => EXMemBranchSel,
     
     --------Other Inputs--------
     arst => arst,
